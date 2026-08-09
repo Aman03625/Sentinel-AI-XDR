@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>URL Scanner | Sentinel AI XDR</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body class="dashboard-page">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <span>◈</span>
+            SENTINEL <small>AI</small>
+        </div>
+
+
+        <div class="sidebar-section">
+            MAIN
+        </div>
+
+
+        <a href="/dashboard" class="nav-item">
+            <span>⌂</span>
+            Dashboard
+        </a>
+
+
+        <a href="/url-scanner"
+           class="nav-item active">
+
+            <span>⌕</span>
+            URL Scanner
+
+        </a>
+
+
+        <a href="#" class="nav-item">
+            <span>⚠</span>
+            Phishing Detector
+        </a>
+
+
+        <a href="/password-auditor" class="nav-item">
+    <span>◇</span>
+    Password Auditor
+</a>
+
+
+        <a href="#" class="nav-item">
+            <span>▣</span>
+            File Scanner
+        </a>
+
+
+        <div class="sidebar-section">
+            INTELLIGENCE
+        </div>
+
+
+        <a href="#" class="nav-item">
+            <span>◫</span>
+            Reports
+        </a>
+
+
+        <a href="#" class="nav-item">
+            <span>◌</span>
+            Analytics
+        </a>
+
+
+        <a href="#" class="nav-item">
+            <span>✦</span>
+            AI Assistant
+        </a>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="/logout"
+               class="nav-item">
+
+                <span>↪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="dashboard-main">
+
+
+        <div class="breadcrumb">
+            Sentinel / Security Tools / URL Scanner
+        </div>
+
+
+        <div class="scanner-heading">
+
+            <div>
+
+                <span class="welcome-label">
+                    THREAT INTELLIGENCE
+                </span>
+
+                <h1>
+                    URL Threat Scanner
+                </h1>
+
+                <p>
+                    Analyze a URL and identify suspicious security indicators.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SCANNER -->
+
+        <section class="panel url-scanner-panel">
+
+
+            <div class="scanner-icon">
+                ⌕
+            </div>
+
+
+            <h2>
+                Analyze a URL
+            </h2>
+
+
+            <p class="scanner-description">
+                Enter a URL below and Sentinel will analyze its
+                structure for potential security risks.
+            </p>
+
+
+            <form method="POST"
+                  class="url-form">
+
+
+                <label>
+                    URL TO ANALYZE
+                </label>
+
+
+                <div class="url-input-wrapper">
+
+                    <input
+                        type="text"
+                        name="url"
+                        placeholder="https://example.com"
+                        autocomplete="off"
+                        required
+                    >
+
+
+                    <button type="submit">
+                        Scan URL →
+                    </button>
+
+                </div>
+
+
+            </form>
+
+<div class="scanner-note">
+
+    <span>●</span>
+
+    Analysis includes URL structure checks and Google Safe Browsing threat intelligence.
+
+</div>
+
+
+        </section>
+
+
+
+        {% if result %}
+
+            {% if result.error %}
+
+                <section class="panel result-panel">
+
+                    <h3>
+                        ⚠ {{ result.error }}
+                    </h3>
+
+                </section>
+
+            {% else %}
+
+
+                <!-- RESULT -->
+
+                <section class="panel result-panel">
+
+
+                    <div class="result-header">
+
+                        <div>
+
+                            <span class="welcome-label">
+                                SCAN COMPLETE
+                            </span>
+
+                            <h2>
+                                Security Analysis
+                            </h2>
+
+                        </div>
+
+
+                        <div class="risk-badge {{ result.level }}">
+
+                            {{ result.verdict }}
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="result-score">
+
+                        <div class="score-ring">
+
+                            <strong>
+                                {{ result.score }}
+                            </strong>
+
+                            <span>
+                                /100
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                RISK SCORE
+                            </small>
+
+                            <h3>
+                                {{ result.verdict }}
+                            </h3>
+
+                            <p>
+                                {{ result.url }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="findings">
+
+                        <h3>
+                            Security Findings
+                        </h3>
+
+
+                        {% for finding in result.findings %}
+
+                            <div class="finding">
+
+                                <span>•</span>
+
+                                {{ finding }}
+
+                            </div>
+
+                        {% endfor %}
+
+
+                    </div>
+
+
+                </section>
+
+            {% endif %}
+
+        {% endif %}
+
+
+    </main>
+
+
+</body>
+
+</html>

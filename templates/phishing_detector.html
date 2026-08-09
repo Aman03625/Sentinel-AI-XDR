@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Phishing Detector | Sentinel AI XDR</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="dashboard-page">
+
+
+    <!-- ================================= -->
+    <!-- SIDEBAR -->
+    <!-- ================================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <span>◈</span>
+            SENTINEL <small>AI</small>
+        </div>
+
+
+        <div class="sidebar-section">
+            MAIN
+        </div>
+
+
+        <a href="/dashboard"
+           class="nav-item">
+
+            <span>⌂</span>
+            Dashboard
+
+        </a>
+
+
+        <a href="/url-scanner"
+           class="nav-item">
+
+            <span>⌕</span>
+            URL Scanner
+
+        </a>
+
+
+        <a href="/scan-history"
+           class="nav-item">
+
+            <span>◫</span>
+            Scan History
+
+        </a>
+
+
+        <a href="/phishing-detector"
+           class="nav-item active">
+
+            <span>⚠</span>
+            Phishing Detector
+
+        </a>
+
+
+       <a href="/password-auditor" class="nav-item">
+    <span>◇</span>
+    Password Auditor
+</a>
+
+
+        <a href="#"
+           class="nav-item">
+
+            <span>▣</span>
+            File Scanner
+
+        </a>
+
+
+        <div class="sidebar-section">
+            INTELLIGENCE
+        </div>
+
+
+        <a href="#"
+           class="nav-item">
+
+            <span>◌</span>
+            Analytics
+
+        </a>
+
+
+        <a href="#"
+           class="nav-item">
+
+            <span>✦</span>
+            AI Assistant
+
+        </a>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="/logout"
+               class="nav-item">
+
+                <span>↪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================================= -->
+    <!-- MAIN -->
+    <!-- ================================= -->
+
+    <main class="dashboard-main">
+
+
+        <div class="breadcrumb">
+
+            Sentinel / Security / Phishing Detector
+
+        </div>
+
+
+        <div class="scanner-heading">
+
+            <span class="welcome-label">
+
+                THREAT INTELLIGENCE
+
+            </span>
+
+
+            <h1>
+
+                Phishing Detector
+
+            </h1>
+
+
+            <p>
+
+                Analyze suspicious URLs for phishing
+                indicators and known security threats.
+
+            </p>
+
+        </div>
+
+
+        <!-- ================================= -->
+        <!-- SCANNER -->
+        <!-- ================================= -->
+
+        <section class="panel url-scanner-panel">
+
+
+            <div class="scanner-icon">
+
+                ⚠
+
+            </div>
+
+
+            <h2>
+
+                Detect Phishing Threats
+
+            </h2>
+
+
+            <p class="scanner-description">
+
+                Enter a suspicious URL and Sentinel AI XDR
+                will analyze multiple phishing indicators.
+
+            </p>
+
+
+            <form method="POST"
+                  class="url-form">
+
+
+                <label>
+
+                    URL TO ANALYZE
+
+                </label>
+
+
+                <div class="url-input-wrapper">
+
+                    <input
+                        type="text"
+                        name="url"
+                        placeholder="https://example.com"
+                        required
+                    >
+
+
+                    <button type="submit">
+
+                        Analyze URL →
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+            <div class="scanner-note">
+
+                <span>●</span>
+
+                Google Safe Browsing threat intelligence enabled
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ================================= -->
+        <!-- ERROR -->
+        <!-- ================================= -->
+
+        {% if result and result.error %}
+
+            <section class="panel result-panel">
+
+                <div class="finding">
+
+                    ⚠ {{ result.error }}
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+
+        <!-- ================================= -->
+        <!-- RESULT -->
+        <!-- ================================= -->
+
+        {% if result and not result.error %}
+
+            <section class="panel result-panel">
+
+
+                <div class="result-header">
+
+                    <div>
+
+                        <span class="welcome-label">
+
+                            ANALYSIS COMPLETE
+
+                        </span>
+
+
+                        <h2>
+
+                            Phishing Security Analysis
+
+                        </h2>
+
+                    </div>
+
+
+                    <span class="risk-badge
+                        {% if result.verdict == 'SAFE' %}
+                            safe
+                        {% elif result.verdict == 'SUSPICIOUS' %}
+                            medium
+                        {% else %}
+                            high
+                        {% endif %}
+                    ">
+
+                        {{ result.verdict }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- SCORE -->
+
+                <div class="result-score">
+
+
+                    <div class="score-ring">
+
+                        <strong>
+
+                            {{ result.score }}
+
+                        </strong>
+
+                        <span>
+
+                            /100
+
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            PHISHING RISK SCORE
+                        </small>
+
+
+                        <h3>
+
+                            {{ result.verdict }}
+
+                        </h3>
+
+
+                        <p>
+
+                            {{ result.url }}
+
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- FINDINGS -->
+
+                <div class="findings">
+
+                    <h3>
+
+                        Security Findings
+
+                    </h3>
+
+
+                    {% for finding in result.findings %}
+
+                        <div class="finding">
+
+                            <span>•</span>
+
+                            {{ finding }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+            </section>
+
+        {% endif %}
+
+
+    </main>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Scan History | Sentinel AI XDR</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body class="dashboard-page">
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-logo">
+        <span>◈</span>
+        SENTINEL <small>AI</small>
+    </div>
+
+    <div class="sidebar-section">
+        MAIN
+    </div>
+
+    <a href="/dashboard" class="nav-item">
+        <span>⌂</span>
+        Dashboard
+    </a>
+
+    <a href="/url-scanner" class="nav-item">
+        <span>⌕</span>
+        URL Scanner
+    </a>
+
+    <a href="/scan-history" class="nav-item active">
+        <span>◫</span>
+        Scan History
+    </a>
+
+    <a href="/phishing-detector" class="nav-item">
+    <span>⚠</span>
+    Phishing Detector
+</a>
+   <a href="/password-auditor" class="nav-item">
+    <span>◇</span>
+    Password Auditor
+</a>
+
+    <a href="#" class="nav-item">
+        <span>▣</span>
+        File Scanner
+    </a>
+
+
+    <div class="sidebar-section">
+        INTELLIGENCE
+    </div>
+
+    <a href="#" class="nav-item">
+        <span>◌</span>
+        Analytics
+    </a>
+
+    <a href="#" class="nav-item">
+        <span>✦</span>
+        AI Assistant
+    </a>
+
+
+    <div class="sidebar-bottom">
+
+        <a href="/logout" class="nav-item">
+            <span>↪</span>
+            Logout
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="dashboard-main">
+
+
+    <div class="breadcrumb">
+        Sentinel / Intelligence / Scan History
+    </div>
+
+
+    <div class="scanner-heading">
+
+        <span class="welcome-label">
+            SECURITY INTELLIGENCE
+        </span>
+
+        <h1>
+            Scan History
+        </h1>
+
+        <p>
+            Previous URL security scans from your Sentinel account.
+        </p>
+
+    </div>
+
+
+    <!-- HISTORY -->
+
+    <section class="panel history-panel">
+
+
+        {% if scans %}
+
+
+            <!-- HEADER -->
+
+            <div class="history-panel-header">
+
+                <div>
+
+                    <h2>
+                        Security Scan Records
+                    </h2>
+
+                    <p>
+                        Complete history of your URL security analysis.
+                    </p>
+
+                </div>
+
+                <a href="/url-scanner"
+                   class="primary-btn">
+
+                    + New Scan
+
+                </a>
+
+            </div>
+
+
+            <!-- SCANS -->
+
+            {% for scan in scans %}
+
+
+                <div class="history-item">
+
+
+                    <!-- ICON -->
+
+                    <div class="history-icon">
+                        ⌕
+                    </div>
+
+
+                    <!-- URL INFO -->
+
+                    <div class="history-info">
+
+                        <strong title="{{ scan.url }}">
+                            {{ scan.url }}
+                        </strong>
+
+                        <span>
+                            Scanned on {{ scan.created_at }}
+                        </span>
+
+                        <div class="history-meta">
+
+                            <span>
+                                URL SECURITY SCAN
+                            </span>
+
+                            <span class="dot">
+                                •
+                            </span>
+
+                            <span>
+                                SENTINEL AI XDR
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SCORE + VERDICT -->
+
+                    <div class="history-score">
+
+
+                        <div class="history-score-box">
+
+                            <strong>
+                                {{ scan.score }}/100
+                            </strong>
+
+                            <small>
+                                RISK SCORE
+                            </small>
+
+                        </div>
+
+
+                        <span class="risk-badge
+                            {% if scan.verdict == 'SAFE' %}
+                                safe
+
+                            {% elif scan.verdict == 'SUSPICIOUS' %}
+                                medium
+
+                            {% else %}
+                                high
+
+                            {% endif %}
+                        ">
+
+                            {{ scan.verdict }}
+
+                        </span>
+
+
+                    </div>
+
+
+                    <!-- SAFE BROWSING -->
+
+                    {% if scan.safe_browsing_checked is defined %}
+
+                        {% if scan.safe_browsing_safe == True %}
+
+                            <div class="history-safe-browsing">
+
+                                <span class="shield">
+                                    🛡
+                                </span>
+
+                                <span>
+                                    Google Safe Browsing
+                                    • No known threat detected
+                                </span>
+
+                            </div>
+
+
+                        {% elif scan.safe_browsing_safe == False %}
+
+                            <div class="history-safe-browsing threat">
+
+                                <span class="shield">
+                                    ⚠
+                                </span>
+
+                                <span>
+                                    Google Safe Browsing
+                                    • Threat detected
+                                </span>
+
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="history-safe-browsing unknown">
+
+                                <span class="shield">
+                                    !
+                                </span>
+
+                                <span>
+                                    Google Safe Browsing
+                                    • Check unavailable
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endif %}
+
+
+                    <!-- FINDINGS -->
+
+                    {% if scan.findings %}
+
+                        <div class="history-findings">
+
+                            <div class="history-findings-title">
+                                SECURITY FINDINGS
+                            </div>
+
+
+                            {% for finding in scan.findings.split('\n') %}
+
+                                <div class="history-finding">
+
+                                    • {{ finding }}
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <!-- EMPTY -->
+
+            <div class="empty-history">
+
+                <div>
+                    ◫
+                </div>
+
+                <h3>
+                    No scans yet
+                </h3>
+
+                <p>
+                    Your URL security scans will appear here.
+                </p>
+
+                <a href="/url-scanner"
+                   class="primary-btn">
+
+                    Start a Scan →
+
+                </a>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </section>
+
+
+</main>
+
+
+</body>
+
+</html>

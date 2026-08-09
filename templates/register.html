@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | Sentinel AI XDR</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-container">
+
+        <!-- LEFT SIDE -->
+        <div class="auth-brand">
+
+            <div class="auth-logo">
+                <span>◈</span> SENTINEL AI
+            </div>
+
+            <div class="auth-content">
+
+                <div class="auth-badge">
+                    ● SECURE REGISTRATION
+                </div>
+
+                <h1>
+                    Join the<br>
+                    <span>defense network.</span>
+                </h1>
+
+                <p>
+                    Create your Sentinel account and access an
+                    intelligent cybersecurity platform built for
+                    modern digital protection.
+                </p>
+
+            </div>
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                SECURITY SYSTEMS OPERATIONAL
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="auth-card-wrapper">
+
+            <div class="auth-card">
+
+                <div class="auth-card-header">
+
+                    <div>
+                        <h2>Create account</h2>
+
+                        <p>
+                            Start securing your digital environment
+                        </p>
+                    </div>
+
+                    <div class="shield-icon">
+                        ◇
+                    </div>
+
+                </div>
+
+
+                <form method="POST"
+                      action="/register">
+
+                    <div class="input-group">
+
+                        <label>Full Name</label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Enter your name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>Email Address</label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>Password</label>
+
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Create a strong password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label>Confirm Password</label>
+
+                        <input
+                            type="password"
+                            name="confirm_password"
+                            placeholder="Confirm your password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="auth-submit"
+                    >
+                        Create Account
+                        <span>→</span>
+                    </button>
+
+                </form>
+
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+
+                <div class="register-text">
+
+                    Already have an account?
+
+                    <a href="/login">
+                        Sign in
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

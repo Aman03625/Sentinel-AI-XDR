@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | Sentinel AI XDR</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="dashboard-page">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <span>◈</span>
+            SENTINEL <small>AI</small>
+        </div>
+
+        <div class="sidebar-section">
+            MAIN
+        </div>
+
+        <nav>
+
+            <a href="/dashboard" class="nav-item active">
+                <span>⌂</span>
+                Dashboard
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>◉</span>
+                Threats
+            </a>
+
+            <a href="/url-scanner" class="nav-item">
+                <span>⌕</span>
+                URL Scanner
+            </a>
+
+            <a href="/scan-history" class="nav-item">
+                <span>◫</span>
+                Scan History
+            </a>
+
+           <a href="/phishing-detector" class="nav-item">
+    <span>⚠</span>
+    Phishing Detector
+</a>
+
+            <a href="/password-auditor" class="nav-item">
+    <span>◇</span>
+    Password Auditor
+</a>
+
+            <a href="#" class="nav-item">
+                <span>▣</span>
+                File Scanner
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-section">
+            INTELLIGENCE
+        </div>
+
+        <nav>
+
+            <a href="#" class="nav-item">
+                <span>◫</span>
+                Reports
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>◌</span>
+                Analytics
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>✦</span>
+                AI Assistant
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+            <a href="/logout" class="nav-item logout">
+                <span>↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="dashboard-main">
+
+
+        <!-- ================= TOPBAR ================= -->
+
+        <header class="dashboard-topbar">
+
+            <div>
+
+                <div class="breadcrumb">
+                    Sentinel / Dashboard
+                </div>
+
+                <h1>
+                    Security Overview
+                </h1>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="system-status-large">
+                    <span></span>
+                    SYSTEM OPERATIONAL
+                </div>
+
+
+                <div class="notification">
+                    ♢
+                </div>
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        {{ (user_name | default('User'))[0] | upper }}
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            {{ user_name | default('User') }}
+                        </strong>
+
+                        <small>
+                            Security Analyst
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= WELCOME ================= -->
+
+        <section class="dashboard-welcome">
+
+            <div>
+
+                <span class="welcome-label">
+                    SECURITY COMMAND CENTER
+                </span>
+
+                <h2>
+                    Welcome back, {{ user_name | default('User') }} 👋
+                </h2>
+
+                <p>
+                    Here's your current cybersecurity intelligence overview.
+                </p>
+
+            </div>
+
+
+            <a href="/url-scanner" class="scan-button">
+                + New Scan
+            </a>
+
+        </section>
+
+
+        <!-- ================= STAT CARDS ================= -->
+
+        <section class="stats-grid">
+
+
+            <!-- SECURITY SCORE -->
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>
+                        SECURITY SCORE
+                    </span>
+
+                    <div class="stat-icon blue">
+                        ◈
+                    </div>
+
+                </div>
+
+
+                <div class="stat-value">
+
+                    <span id="securityScoreValue">
+                        {{ security_score | default(0) }}
+                    </span>
+
+                    <span>
+                        /100
+                    </span>
+
+                </div>
+
+
+                <div class="stat-progress">
+
+                    <div
+                        id="securityProgress"
+                        class="stat-progress-fill">
+                    </div>
+
+                </div>
+
+
+                <p class="stat-good">
+                    Security score based on your scans
+                </p>
+
+            </div>
+
+
+            <!-- ACTIVE THREATS -->
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>
+                        ACTIVE THREATS
+                    </span>
+
+                    <div class="stat-icon red">
+                        ⚠
+                    </div>
+
+                </div>
+
+
+                <div class="stat-value">
+
+                    {{ active_threats | default(0) }}
+
+                </div>
+
+
+                <p class="stat-danger">
+
+                    {{ high_risk | default(0) }}
+                    high priority
+
+                </p>
+
+            </div>
+
+
+            <!-- TOTAL SCANS -->
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>
+                        TOTAL SCANS
+                    </span>
+
+                    <div class="stat-icon purple">
+                        ⌕
+                    </div>
+
+                </div>
+
+
+                <div class="stat-value">
+
+                    {{ total_scans | default(0) }}
+
+                </div>
+
+
+                <p class="stat-muted">
+                    Total URL security scans
+                </p>
+
+            </div>
+
+
+            <!-- THREATS BLOCKED -->
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>
+                        THREATS BLOCKED
+                    </span>
+
+                    <div class="stat-icon green">
+                        ✓
+                    </div>
+
+                </div>
+
+
+                <div class="stat-value">
+
+                    {{ blocked_threats | default(0) }}
+
+                </div>
+
+
+                <p class="stat-good">
+                    High-risk threats detected
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ANALYTICS ================= -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- THREAT ANALYTICS -->
+
+            <div class="panel analytics-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Threat Analytics
+                        </h3>
+
+                        <p>
+                            Security activity over the last 7 days
+                        </p>
+
+                    </div>
+
+
+                    <select>
+
+                        <option>
+                            Last 7 days
+                        </option>
+
+                        <option>
+                            Last 30 days
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <canvas id="threatChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- THREAT LEVEL -->
+
+            <div class="panel threat-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Threat Level
+                        </h3>
+
+                        <p>
+                            Current environment status
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="threat-circle">
+
+                    <div>
+
+                        <strong>
+                            {{ threat_level | default('LOW') }}
+                        </strong>
+
+                        <span>
+                            Risk Level
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="threat-scale">
+
+                    <span>
+                        LOW
+                    </span>
+
+                    <span>
+                        MEDIUM
+                    </span>
+
+                    <span>
+                        HIGH
+                    </span>
+
+                    <span>
+                        CRITICAL
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= RECENT ACTIVITY ================= -->
+
+        <section class="panel activity-panel">
+
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h3>
+                        Recent Threat Activity
+                    </h3>
+
+                    <p>
+                        Latest security events detected by Sentinel
+                    </p>
+
+                </div>
+
+
+                <a href="/scan-history">
+                    View all →
+                </a>
+
+            </div>
+
+
+            <div class="activity-list">
+
+
+                {% if recent_scans %}
+
+
+                    {% for scan in recent_scans %}
+
+
+                        <div class="activity-item">
+
+
+                            <!-- ACTIVITY ICON -->
+
+                            <div class="activity-icon
+                                {% if scan.verdict == 'HIGH RISK' %}
+                                    danger
+                                {% elif scan.verdict == 'SUSPICIOUS' %}
+                                    warning
+                                {% else %}
+                                    success
+                                {% endif %}
+                            ">
+
+
+                                {% if scan.verdict == 'HIGH RISK' %}
+
+                                    ⚠
+
+                                {% elif scan.verdict == 'SUSPICIOUS' %}
+
+                                    !
+
+                                {% else %}
+
+                                    ✓
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                            <!-- ACTIVITY INFO -->
+
+                            <div class="activity-info">
+
+                                <strong>
+                                    {{ scan.verdict | default('UNKNOWN') }}
+                                    URL detected
+                                </strong>
+
+
+                                <span>
+                                    URL Scanner ·
+                                    {{ scan.url | default('Unknown URL') }}
+                                </span>
+
+                            </div>
+
+
+                            <!-- SEVERITY -->
+
+                            <div class="severity
+                                {% if scan.verdict == 'HIGH RISK' %}
+                                    high
+                                {% elif scan.verdict == 'SUSPICIOUS' %}
+                                    medium
+                                {% else %}
+                                    safe
+                                {% endif %}
+                            ">
+
+                                {{ scan.verdict | default('UNKNOWN') }}
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <div class="empty-history">
+
+                        <h3>
+                            No security activity yet
+                        </h3>
+
+                        <p>
+                            Run your first URL scan to see activity here.
+                        </p>
+
+                        <a href="/url-scanner" class="primary-btn">
+                            Start a Scan →
+                        </a>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ================= CHART DATA ================= -->
+
+    <script type="application/json" id="chartLabelsData">
+        {{ chart_labels | default([]) | tojson }}
+    </script>
+
+
+    <script type="application/json" id="chartValuesData">
+        {{ chart_data | default([]) | tojson }}
+    </script>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+            /* ==========================
+               SECURITY SCORE
+            ========================== */
+
+            const scoreElement =
+                document.getElementById("securityScoreValue");
+
+            const progressElement =
+                document.getElementById("securityProgress");
+
+
+            if (scoreElement && progressElement) {
+
+                let score =
+                    parseFloat(scoreElement.textContent.trim()) || 0;
+
+
+                score =
+                    Math.max(0, Math.min(100, score));
+
+
+                progressElement.style.width =
+                    score + "%";
+
+            }
+
+
+            /* ==========================
+               CHART DATA
+            ========================== */
+
+            const labelsElement =
+                document.getElementById("chartLabelsData");
+
+            const valuesElement =
+                document.getElementById("chartValuesData");
+
+
+            let chartLabels = [];
+            let chartData = [];
+
+
+            try {
+
+                chartLabels =
+                    JSON.parse(labelsElement.textContent);
+
+            } catch (error) {
+
+                chartLabels = [];
+
+            }
+
+
+            try {
+
+                chartData =
+                    JSON.parse(valuesElement.textContent);
+
+            } catch (error) {
+
+                chartData = [];
+
+            }
+
+
+            /* ==========================
+               THREAT CHART
+            ========================== */
+
+            const canvas =
+                document.getElementById("threatChart");
+
+
+            if (canvas && typeof Chart !== "undefined") {
+
+                new Chart(canvas, {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: chartLabels,
+
+                        datasets: [
+
+                            {
+
+                                label: "Threats",
+
+                                data: chartData,
+
+                                borderWidth: 2,
+
+                                tension: 0.4,
+
+                                fill: true
+
+                            }
+
+                        ]
+
+                    },
+
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+
+                        plugins: {
+
+                            legend: {
+
+                                display: false
+
+                            }
+
+                        },
+
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero: true
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+            }
+
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>
