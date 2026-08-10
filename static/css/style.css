@@ -4821,3 +4821,109 @@ footer {
 
     margin-right: 8px;
 }
+/* ==========================================
+   MAIN CONTENT LAYOUT FIX
+========================================== */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+/* ==========================================
+   TOPBAR
+========================================== */
+
+.main-content .topbar {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   SCANNER PAGE
+========================================== */
+
+.scanner-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 30px;
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        width: 210px;
+    }
+
+    .main-content {
+        margin-left: 210px;
+        width: calc(100% - 210px);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .scanner-container {
+        padding: 0 15px;
+    }
+
+}
+#fileName {
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#fileInfo {
+    color: #94a3b8;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.brand-icon {
+    font-size: 30px;
+}
+
+.brand span:not(.brand-icon) {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.brand small {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-left: -6px;
+}

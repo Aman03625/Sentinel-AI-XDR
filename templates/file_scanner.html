@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>File Scanner | Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body class="dashboard-page">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+
+       <div class="sidebar-logo">
+
+    <a href="{{ url_for('dashboard') }}" class="brand">
+
+        <span class="brand-icon">🛡️</span>
+
+        <span>SENTINEL</span>
+
+        <small>AI XDR</small>
+
+    </a>
+
+</div>
+
+
+        <nav>
+
+
+            <a href="/dashboard"
+               class="nav-item">
+
+                <span>▣</span>
+                Dashboard
+
+            </a>
+
+
+            <a href="/url-scanner"
+               class="nav-item">
+
+                <span>🔗</span>
+                URL Scanner
+
+            </a>
+
+
+            <a href="/phishing-detector"
+               class="nav-item">
+
+                <span>🎣</span>
+                Phishing Detector
+
+            </a>
+
+
+            <a href="/password-auditor"
+               class="nav-item">
+
+                <span>🔑</span>
+                Password Auditor
+
+            </a>
+
+
+            <a href="/file-scanner"
+               class="nav-item active">
+
+                <span>📁</span>
+                File Scanner
+
+            </a>
+
+
+            <a href="/scan-history"
+               class="nav-item">
+
+                <span>▤</span>
+                Scan History
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- INTELLIGENCE -->
+
+        <div class="sidebar-section">
+            INTELLIGENCE
+        </div>
+
+
+        <nav>
+
+
+            <a href="#"
+               class="nav-item">
+
+                <span>◉</span>
+                Reports
+
+            </a>
+
+
+            <a href="#"
+               class="nav-item">
+
+                <span>⚙</span>
+                Settings
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- LOGOUT -->
+
+        <div class="sidebar-bottom">
+
+
+            <a href="/logout"
+               class="nav-item logout">
+
+                <span>↪</span>
+                Logout
+
+            </a>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+
+            <div>
+
+                <h1>
+                    File Scanner
+                </h1>
+
+                <p>
+                    Analyze files for basic security risk indicators
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <span>👤</span>
+
+                {{ session.get("user_name", "User") }}
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- ================= SCANNER ================= -->
+
+        <section class="scanner-container">
+
+
+            <!-- UPLOAD CARD -->
+
+            <div class="scanner-card">
+
+
+                <div class="scanner-icon">
+                    📁
+                </div>
+
+
+                <h2>
+                    Upload File for Analysis
+                </h2>
+
+
+                <p class="scanner-description">
+
+                    Upload a file to analyze its type, size,
+                    SHA-256 hash and basic security indicators.
+
+                </p>
+
+
+
+                <!-- ERROR MESSAGE -->
+
+                {% if result and result.error %}
+
+                    <div class="alert error">
+
+                        {{ result.error }}
+
+                    </div>
+
+                {% endif %}
+
+
+
+                <!-- FILE FORM -->
+
+                <form method="POST"
+                      action="/file-scanner"
+                      enctype="multipart/form-data">
+
+
+                    <div class="file-upload">
+
+
+                        <input
+                            type="file"
+                            name="file"
+                            id="file"
+                            required
+                        >
+
+
+                        <label for="file" id="fileLabel">
+
+    <div class="upload-icon">
+        ⬆
+    </div>
+
+    <strong id="fileName">
+        Choose a file
+    </strong>
+
+    <span id="fileText">
+        Click here to select a file
+    </span>
+
+</label>
+
+
+                    </div>
+
+
+
+                    <button type="submit"
+                            class="scan-button">
+
+                        🔍 Scan File
+
+                    </button>
+
+
+                </form>
+
+
+            </div>
+
+
+
+            <!-- ================= RESULT CARD ================= -->
+
+            {% if result and result.filename %}
+
+
+            <div class="result-card">
+
+
+                <!-- RESULT HEADER -->
+
+                <div class="result-header">
+
+
+                    <div>
+
+                        <h2>
+                            Scan Result
+                        </h2>
+
+                        <p>
+                            Analysis completed successfully
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- VERDICT -->
+
+                    {% if result.verdict == "HIGH RISK" %}
+
+                        <span class="verdict high">
+                            HIGH RISK
+                        </span>
+
+
+                    {% elif result.verdict == "SUSPICIOUS" %}
+
+                        <span class="verdict medium">
+                            SUSPICIOUS
+                        </span>
+
+
+                    {% else %}
+
+                        <span class="verdict safe">
+                            SAFE
+                        </span>
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+                <!-- ================= FILE INFORMATION ================= -->
+
+                <div class="file-info-grid">
+
+
+                    <div class="info-box">
+
+                        <span>
+                            File Name
+                        </span>
+
+                        <strong>
+                            {{ result.filename }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="info-box">
+
+                        <span>
+                            File Type
+                        </span>
+
+                        <strong>
+                            {{ result.file_type }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="info-box">
+
+                        <span>
+                            Extension
+                        </span>
+
+                        <strong>
+                            {{ result.extension }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="info-box">
+
+                        <span>
+                            File Size
+                        </span>
+
+                        <strong>
+                            {{ result.size }}
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="info-box full">
+
+                        <span>
+                            SHA-256 Hash
+                        </span>
+
+                        <strong class="hash">
+                            {{ result.hash }}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- ================= RISK SCORE ================= -->
+
+                <div class="risk-score">
+
+
+                    <div class="score-header">
+
+                        <span>
+                            Risk Score
+                        </span>
+
+                        <strong>
+                            {{ result.score | default(0) }}/100
+                        </strong>
+
+                    </div>
+
+
+
+                    <div class="score-bar">
+
+
+                        <div
+                            class="score-fill
+                            {% if result.score | default(0) >= 60 %}
+                                danger
+                            {% elif result.score | default(0) >= 30 %}
+                                warning
+                            {% else %}
+                                safe
+                            {% endif %}"
+
+                            data-score="{{ result.score | default(0) }}">
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- ================= FINDINGS ================= -->
+
+                <div class="findings">
+
+
+                    <h3>
+                        Security Findings
+                    </h3>
+
+
+                    {% if result.findings %}
+
+
+                        {% for finding in result.findings %}
+
+
+                            <div class="finding">
+
+
+                                <span>
+                                    ⚠
+                                </span>
+
+
+                                <p>
+                                    {{ finding }}
+                                </p>
+
+
+                            </div>
+
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+
+                        <div class="finding">
+
+
+                            <span>
+                                ✓
+                            </span>
+
+
+                            <p>
+                                No security findings detected.
+                            </p>
+
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+
+                <!-- ================= RECOMMENDATION ================= -->
+
+                <div class="recommendation">
+
+
+                    <h3>
+                        Recommendation
+                    </h3>
+
+
+                    <p>
+
+                        {{ result.recommendation |
+                           default("No additional recommendation available.") }}
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ================= PAGE CSS ================= -->
+
+    <style>
+
+
+        /* =========================
+           SCANNER CONTAINER
+        ========================= */
+
+        .scanner-container {
+
+            max-width: 1100px;
+
+            margin: 40px auto;
+
+            padding: 0 25px;
+
+        }
+
+
+
+        /* =========================
+           CARDS
+        ========================= */
+
+        .scanner-card,
+        .result-card {
+
+            background: rgba(15, 23, 42, 0.95);
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            border-radius: 18px;
+
+            padding: 30px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.25);
+
+        }
+
+
+
+        .scanner-card {
+
+            text-align: center;
+
+        }
+
+
+
+        /* =========================
+           SCANNER ICON
+        ========================= */
+
+        .scanner-icon {
+
+            font-size: 55px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .scanner-card h2 {
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .scanner-description {
+
+            opacity: 0.7;
+
+            margin-bottom: 30px;
+
+        }
+
+
+
+        /* =========================
+           FILE UPLOAD
+        ========================= */
+
+        .file-upload {
+
+            margin: 20px 0;
+
+        }
+
+
+
+        .file-upload input {
+
+            display: none;
+
+        }
+
+
+
+        .file-upload label {
+
+            min-height: 180px;
+
+            border:
+                2px dashed rgba(255, 255, 255, 0.2);
+
+            border-radius: 15px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+        }
+
+
+
+        .file-upload label:hover {
+
+            border-color: #00bfff;
+
+            background:
+                rgba(0, 191, 255, 0.05);
+
+        }
+
+
+
+        .upload-icon {
+
+            font-size: 40px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .file-upload label span {
+
+            opacity: 0.6;
+
+            margin-top: 8px;
+
+        }
+
+
+
+        /* =========================
+           SCAN BUTTON
+        ========================= */
+
+        .scan-button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #0ea5e9;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+        }
+
+
+
+        .scan-button:hover {
+
+            opacity: 0.9;
+
+        }
+
+
+
+        /* =========================
+           RESULT HEADER
+        ========================= */
+
+        .result-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 25px;
+
+        }
+
+
+
+        /* =========================
+           VERDICT
+        ========================= */
+
+        .verdict {
+
+            padding: 8px 15px;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+        }
+
+
+
+        .verdict.high {
+
+            background:
+                rgba(239, 68, 68, 0.15);
+
+            color: #ef4444;
+
+        }
+
+
+
+        .verdict.medium {
+
+            background:
+                rgba(245, 158, 11, 0.15);
+
+            color: #f59e0b;
+
+        }
+
+
+
+        .verdict.safe {
+
+            background:
+                rgba(34, 197, 94, 0.15);
+
+            color: #22c55e;
+
+        }
+
+
+
+        /* =========================
+           FILE INFORMATION
+        ========================= */
+
+        .file-info-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 15px;
+
+        }
+
+
+
+        .info-box {
+
+            background:
+                rgba(255, 255, 255, 0.04);
+
+            padding: 18px;
+
+            border-radius: 10px;
+
+        }
+
+
+
+        .info-box.full {
+
+            grid-column: 1 / -1;
+
+        }
+
+
+
+        .info-box span {
+
+            display: block;
+
+            font-size: 12px;
+
+            opacity: 0.6;
+
+            margin-bottom: 7px;
+
+        }
+
+
+
+        .info-box strong {
+
+            word-break: break-word;
+
+        }
+
+
+
+        .hash {
+
+            font-family: monospace;
+
+            font-size: 12px;
+
+        }
+
+
+
+        /* =========================
+           RISK SCORE
+        ========================= */
+
+        .risk-score {
+
+            margin-top: 25px;
+
+        }
+
+
+
+        .score-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .score-bar {
+
+            height: 10px;
+
+            background:
+                rgba(255, 255, 255, 0.1);
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+        }
+
+
+
+        .score-fill {
+
+            height: 100%;
+
+            border-radius: 10px;
+
+            transition: width 0.5s ease;
+
+        }
+
+
+
+        .score-fill.safe {
+
+            background: #22c55e;
+
+        }
+
+
+
+        .score-fill.warning {
+
+            background: #f59e0b;
+
+        }
+
+
+
+        .score-fill.danger {
+
+            background: #ef4444;
+
+        }
+
+
+
+        /* =========================
+           FINDINGS
+        ========================= */
+
+        .findings {
+
+            margin-top: 30px;
+
+        }
+
+
+
+        .finding {
+
+            display: flex;
+
+            gap: 12px;
+
+            padding: 12px;
+
+            margin-top: 8px;
+
+            background:
+                rgba(255, 255, 255, 0.03);
+
+            border-radius: 8px;
+
+        }
+
+
+
+        .finding p {
+
+            margin: 0;
+
+            word-break: break-word;
+
+        }
+
+
+
+        /* =========================
+           RECOMMENDATION
+        ========================= */
+
+        .recommendation {
+
+            margin-top: 25px;
+
+            padding: 18px;
+
+            border-left:
+                4px solid #0ea5e9;
+
+            background:
+                rgba(14, 165, 233, 0.08);
+
+            border-radius: 8px;
+
+        }
+
+
+
+        /* =========================
+           ERROR
+        ========================= */
+
+        .alert.error {
+
+            background:
+                rgba(239, 68, 68, 0.12);
+
+            color: #ef4444;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+
+            .scanner-container {
+
+                margin: 20px auto;
+
+                padding: 0 15px;
+
+            }
+
+
+            .scanner-card,
+            .result-card {
+
+                padding: 20px;
+
+            }
+
+
+            .file-info-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .info-box.full {
+
+                grid-column: auto;
+
+            }
+
+
+            .result-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 15px;
+
+            }
+
+
+        }
+
+
+    </style>
+    
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* =========================
+       FILE SELECT
+    ========================= */
+
+    const fileInput = document.getElementById("file");
+    const fileName = document.getElementById("fileName");
+    const fileText = document.getElementById("fileText");
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            if (this.files.length > 0) {
+
+                const file = this.files[0];
+
+                fileName.textContent = file.name;
+
+                fileText.textContent =
+                    "File selected successfully";
+
+            } else {
+
+                fileName.textContent = "Choose a file";
+
+                fileText.textContent =
+                    "Click here to select a file";
+
+            }
+
+        });
+
+    }
+
+
+    /* =========================
+       RISK SCORE
+    ========================= */
+
+    const scoreBar = document.querySelector(".score-fill");
+
+    if (scoreBar) {
+
+        const score =
+            parseFloat(scoreBar.dataset.score) || 0;
+
+        scoreBar.style.width =
+            Math.max(0, Math.min(100, score)) + "%";
+
+    }
+
+});
+</script>
+
+</body>
+
+</html>

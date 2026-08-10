@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard | Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -19,10 +22,11 @@
 
     <aside class="sidebar">
 
-        <div class="sidebar-logo">
-            <span>◈</span>
-            SENTINEL <small>AI</small>
-        </div>
+        <a href="{{ url_for('home') }}" class="brand">
+    <span class="brand-icon">🛡️</span>
+    <span>SENTINEL</span>
+    <small>AI XDR</small>
+</a>
 
         <div class="sidebar-section">
             MAIN
@@ -50,17 +54,17 @@
                 Scan History
             </a>
 
-           <a href="/phishing-detector" class="nav-item">
-    <span>⚠</span>
-    Phishing Detector
-</a>
+            <a href="/phishing-detector" class="nav-item">
+                <span>⚠</span>
+                Phishing Detector
+            </a>
 
             <a href="/password-auditor" class="nav-item">
-    <span>◇</span>
-    Password Auditor
-</a>
+                <span>◇</span>
+                Password Auditor
+            </a>
 
-            <a href="#" class="nav-item">
+            <a href="/file-scanner" class="nav-item">
                 <span>▣</span>
                 File Scanner
             </a>
@@ -371,13 +375,13 @@
                     </div>
 
 
-                    <select>
+                    <select id="timeRange">
 
-                        <option>
+                        <option value="7">
                             Last 7 days
                         </option>
 
-                        <option>
+                        <option value="30">
                             Last 30 days
                         </option>
 
@@ -661,26 +665,44 @@
             let chartData = [];
 
 
-            try {
+            if (labelsElement) {
 
-                chartLabels =
-                    JSON.parse(labelsElement.textContent);
+                try {
 
-            } catch (error) {
+                    chartLabels =
+                        JSON.parse(labelsElement.textContent.trim());
 
-                chartLabels = [];
+                } catch (error) {
+
+                    console.error(
+                        "Chart labels error:",
+                        error
+                    );
+
+                    chartLabels = [];
+
+                }
 
             }
 
 
-            try {
+            if (valuesElement) {
 
-                chartData =
-                    JSON.parse(valuesElement.textContent);
+                try {
 
-            } catch (error) {
+                    chartData =
+                        JSON.parse(valuesElement.textContent.trim());
 
-                chartData = [];
+                } catch (error) {
+
+                    console.error(
+                        "Chart data error:",
+                        error
+                    );
+
+                    chartData = [];
+
+                }
 
             }
 
@@ -693,7 +715,10 @@
                 document.getElementById("threatChart");
 
 
-            if (canvas && typeof Chart !== "undefined") {
+            if (
+                canvas &&
+                typeof Chart !== "undefined"
+            ) {
 
                 new Chart(canvas, {
 
@@ -746,7 +771,13 @@
 
                             y: {
 
-                                beginAtZero: true
+                                beginAtZero: true,
+
+                                ticks: {
+
+                                    precision: 0
+
+                                }
 
                             }
 
@@ -757,7 +788,6 @@
                 });
 
             }
-
 
         });
 

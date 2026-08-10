@@ -9,6 +9,9 @@
           content="width=device-width, initial-scale=1.0">
 
     <title>URL Scanner | Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -21,17 +24,17 @@
 
     <!-- SIDEBAR -->
 
-    <aside class="sidebar">
+   <aside class="sidebar">
 
-        <div class="sidebar-logo">
-            <span>◈</span>
-            SENTINEL <small>AI</small>
-        </div>
+    <a href="{{ url_for('home') }}" class="brand">
+        <span class="brand-icon">🛡️</span>
+        <span>SENTINEL</span>
+        <small>AI XDR</small>
+    </a>
 
-
-        <div class="sidebar-section">
-            MAIN
-        </div>
+    <div class="sidebar-section">
+        MAIN
+    </div>
 
 
         <a href="/dashboard" class="nav-item">
@@ -49,7 +52,7 @@
         </a>
 
 
-        <a href="#" class="nav-item">
+         <a href="/phishing-detector" class="nav-item">
             <span>⚠</span>
             Phishing Detector
         </a>
@@ -61,10 +64,10 @@
 </a>
 
 
-        <a href="#" class="nav-item">
-            <span>▣</span>
-            File Scanner
-        </a>
+         <a href="/file-scanner" class="nav-item">
+                <span>▣</span>
+                File Scanner
+            </a>
 
 
         <div class="sidebar-section">

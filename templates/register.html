@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Create Account | Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -18,9 +21,11 @@
         <!-- LEFT SIDE -->
         <div class="auth-brand">
 
-            <div class="auth-logo">
-                <span>◈</span> SENTINEL AI
-            </div>
+            <a href="{{ url_for('home') }}" class="brand">
+    <span class="brand-icon">🛡️</span>
+    <span>SENTINEL</span>
+    <small>AI XDR</small>
+</a>
 
             <div class="auth-content">
 

@@ -5,26 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
 
-    <nav class="navbar">
+   <nav class="navbar">
 
-        <div class="logo">
-            <span class="logo-icon">◈</span>
-            SENTINEL <span>AI</span>
-        </div>
+    <a href="{{ url_for('home') }}" class="brand">
+        <span class="brand-icon">🛡️</span>
+        <span>SENTINEL</span>
+        <small>AI XDR</small>
+    </a>
 
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-           <a href="/login" class="login-btn">Login</a>
-        </div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('register') }}">Register</a>
+    </div>
 
-    </nav>
+</nav>
+
+</nav>
 
 
     <main class="hero">

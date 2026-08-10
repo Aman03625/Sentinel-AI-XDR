@@ -9,6 +9,9 @@
           content="width=device-width, initial-scale=1.0">
 
     <title>Scan History | Sentinel AI XDR</title>
+    <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -22,10 +25,11 @@
 
 <aside class="sidebar">
 
-    <div class="sidebar-logo">
-        <span>◈</span>
-        SENTINEL <small>AI</small>
-    </div>
+    <a href="{{ url_for('home') }}" class="brand">
+        <span class="brand-icon">🛡️</span>
+        <span>SENTINEL</span>
+        <small>AI XDR</small>
+    </a>
 
     <div class="sidebar-section">
         MAIN
@@ -55,10 +59,10 @@
     Password Auditor
 </a>
 
-    <a href="#" class="nav-item">
-        <span>▣</span>
-        File Scanner
-    </a>
+ <a href="/file-scanner" class="nav-item">
+                <span>▣</span>
+                File Scanner
+            </a>
 
 
     <div class="sidebar-section">

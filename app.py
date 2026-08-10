@@ -1199,6 +1199,39 @@ def phishing_detector():
                 "level": level,
                 "findings": findings
             }
+                        # ==================================
+            # SAVE PHISHING SCAN TO DATABASE
+            # ==================================
+
+            threat_text = ""
+
+            if safe_browsing_result.get("matches"):
+                threat_names = []
+
+                for threat in safe_browsing_result["matches"]:
+                    threat_names.append(
+                        threat.get("threat_type", "UNKNOWN")
+                    )
+
+                threat_text = ", ".join(threat_names)
+
+            scan = URLScan(
+                user_id=session["user_id"],
+                url=url,
+                score=score,
+                verdict=verdict,
+                findings="\n".join(findings),
+                safe_browsing_checked=safe_browsing_result.get(
+                    "checked", False
+                ),
+                safe_browsing_safe=safe_browsing_result.get(
+                    "safe"
+                ),
+                safe_browsing_threats=threat_text
+            )
+
+            db.session.add(scan)
+            db.session.commit()
 
     return render_template(
         "phishing_detector.html",
@@ -1466,6 +1499,9 @@ def analyze_password(password):
 @app.route("/password-auditor", methods=["GET", "POST"])
 def password_auditor():
 
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
     result = None
 
     if request.method == "POST":
@@ -1473,120 +1509,313 @@ def password_auditor():
         password = request.form.get("password", "")
 
         if not password:
+
             result = {
                 "error": "Please enter a password."
             }
 
         else:
 
-            score = 0
-            findings = []
-
-            # Length
-            if len(password) >= 12:
-                score += 25
-                findings.append("Excellent password length detected.")
-            elif len(password) >= 8:
-                score += 15
-                findings.append("Good password length detected.")
-            else:
-                findings.append("Increase password length to at least 8 characters.")
-
-            # Uppercase
-            if re.search(r"[A-Z]", password):
-                score += 15
-                findings.append("Uppercase letter detected.")
-            else:
-                findings.append("Add at least one uppercase letter.")
-
-            # Lowercase
-            if re.search(r"[a-z]", password):
-                score += 15
-                findings.append("Lowercase letter detected.")
-            else:
-                findings.append("Add at least one lowercase letter.")
-
-            # Numbers
-            if re.search(r"[0-9]", password):
-                score += 20
-                findings.append("Number detected.")
-            else:
-                findings.append("Add at least one number.")
-
-            # Special characters
-            if re.search(r"[^A-Za-z0-9]", password):
-                score += 25
-                findings.append("Special character detected.")
-            else:
-                findings.append("Add at least one special character.")
-
-            # Verdict
-            if score >= 80:
-                verdict = "STRONG"
-            elif score >= 60:
-                verdict = "MODERATE"
-            else:
-                verdict = "WEAK"
-
-            # Character statistics
-            uppercase_count = len(re.findall(r"[A-Z]", password))
-            lowercase_count = len(re.findall(r"[a-z]", password))
-            number_count = len(re.findall(r"[0-9]", password))
-            special_count = len(re.findall(r"[^A-Za-z0-9]", password))
-
-            # Simple entropy estimate
-            character_pool = 0
-
-            if uppercase_count:
-                character_pool += 26
-
-            if lowercase_count:
-                character_pool += 26
-
-            if number_count:
-                character_pool += 10
-
-            if special_count:
-                character_pool += 32
-
-            entropy = 0
-
-            if character_pool > 0:
-                entropy = round(
-                    len(password) * (character_pool.bit_length() - 1),
-                    1
-                )
-
-            # Crack time category
-            if score >= 90:
-                crack_time = "Very difficult to crack"
-            elif score >= 75:
-                crack_time = "Difficult to crack"
-            elif score >= 60:
-                crack_time = "Moderate resistance"
-            elif score >= 40:
-                crack_time = "Weak resistance"
-            else:
-                crack_time = "Easy to crack"
-
-            result = {
-                "score": score,
-                "verdict": verdict,
-                "findings": findings,
-                "length": len(password),
-                "uppercase": uppercase_count,
-                "lowercase": lowercase_count,
-                "numbers": number_count,
-                "special": special_count,
-                "entropy": entropy,
-                "crack_time": crack_time
-            }
+            result = analyze_password(password)
 
     return render_template(
         "password_auditor.html",
         result=result
     )
 
+# ==========================================
+# FILE SCANNER
+# ==========================================
+
+@app.route("/file-scanner", methods=["GET", "POST"])
+def file_scanner():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    result = None
+
+    if request.method == "POST":
+
+        uploaded_file = request.files.get("file")
+
+        if uploaded_file is None:
+            result = {
+                "error": "No file was received."
+            }
+
+        elif uploaded_file.filename == "":
+            result = {
+                "error": "Please select a file."
+            }
+
+        else:
+
+            filename = uploaded_file.filename
+
+            # File extension
+            extension = os.path.splitext(filename)[1].lower()
+
+            # File size
+            uploaded_file.seek(0, os.SEEK_END)
+            file_size = uploaded_file.tell()
+            uploaded_file.seek(0)
+
+            # SHA-256
+            import hashlib
+
+            sha256 = hashlib.sha256()
+
+            while True:
+
+                chunk = uploaded_file.read(8192)
+
+                if not chunk:
+                    break
+
+                sha256.update(chunk)
+
+            file_hash = sha256.hexdigest()
+
+            # File size display
+            if file_size < 1024:
+
+                size_display = f"{file_size} Bytes"
+
+            elif file_size < 1024 * 1024:
+
+                size_display = f"{file_size / 1024:.2f} KB"
+
+            else:
+
+                size_display = (
+                    f"{file_size / (1024 * 1024):.2f} MB"
+                )
+
+            # File type
+            file_types = {
+
+                ".txt": "Text File",
+                ".pdf": "PDF Document",
+
+                ".doc": "Word Document",
+                ".docx": "Word Document",
+
+                ".xls": "Excel Spreadsheet",
+                ".xlsx": "Excel Spreadsheet",
+
+                ".ppt": "PowerPoint",
+                ".pptx": "PowerPoint",
+
+                ".jpg": "Image",
+                ".jpeg": "Image",
+                ".png": "Image",
+                ".gif": "Image",
+
+                ".mp3": "Audio",
+                ".wav": "Audio",
+
+                ".mp4": "Video",
+                ".avi": "Video",
+                ".mkv": "Video",
+
+                ".zip": "ZIP Archive",
+                ".rar": "RAR Archive",
+                ".7z": "7Z Archive",
+
+                ".py": "Python Source Code",
+                ".java": "Java Source Code",
+                ".js": "JavaScript Source Code",
+
+                ".html": "HTML Document",
+                ".css": "CSS Stylesheet",
+
+                ".exe": "Windows Executable",
+                ".msi": "Windows Installer",
+
+                ".bat": "Batch Script",
+                ".cmd": "Command Script",
+
+                ".ps1": "PowerShell Script",
+                ".vbs": "VBScript"
+            }
+
+            file_type = file_types.get(
+                extension,
+                "Unknown File Type"
+            )
+
+            # ==================================
+            # SECURITY ANALYSIS
+            # ==================================
+
+            score = 0
+            findings = []
+
+            dangerous_extensions = {
+                ".exe",
+                ".msi",
+                ".bat",
+                ".cmd",
+                ".ps1",
+                ".vbs",
+                ".scr",
+                ".com"
+            }
+
+            suspicious_extensions = {
+                ".zip",
+                ".rar",
+                ".7z"
+            }
+
+            # Dangerous extension
+
+            if extension in dangerous_extensions:
+
+                score += 70
+
+                findings.append(
+                    "Executable or script file detected."
+                )
+
+                findings.append(
+                    "This file type may execute commands."
+                )
+
+            # Archive
+
+            elif extension in suspicious_extensions:
+
+                score += 25
+
+                findings.append(
+                    "Compressed archive detected."
+                )
+
+                findings.append(
+                    "Archives may contain executable files."
+                )
+
+            else:
+
+                findings.append(
+                    "No inherently executable file extension detected."
+                )
+
+            # Large file
+
+            if file_size > 100 * 1024 * 1024:
+
+                score += 10
+
+                findings.append(
+                    "Large file size detected."
+                )
+
+            # Double extension
+
+            suspicious_names = [
+                ".pdf.exe",
+                ".doc.exe",
+                ".docx.exe",
+                ".jpg.exe",
+                ".png.exe",
+                ".txt.exe"
+            ]
+
+            filename_lower = filename.lower()
+
+            for pattern in suspicious_names:
+
+                if filename_lower.endswith(pattern):
+
+                    score += 30
+
+                    findings.append(
+                        "Suspicious double file extension detected."
+                    )
+
+                    break
+
+            # Invoice executable
+
+            if (
+                "invoice" in filename_lower
+                and extension in dangerous_extensions
+            ):
+
+                score += 10
+
+                findings.append(
+                    "Filename looks like a document "
+                    "but uses an executable extension."
+                )
+
+            # Limit score
+
+            score = min(score, 100)
+
+            # Verdict
+
+            if score >= 60:
+
+                verdict = "HIGH RISK"
+
+                recommendation = (
+                    "Do not execute this file unless "
+                    "you completely trust its source."
+                )
+
+            elif score >= 30:
+
+                verdict = "SUSPICIOUS"
+
+                recommendation = (
+                    "Treat this file with caution and "
+                    "verify its source before opening it."
+                )
+
+            else:
+
+                verdict = "SAFE"
+
+                recommendation = (
+                    "No major risk indicators were found "
+                    "from the basic file characteristics."
+                )
+
+            # Final result
+
+            result = {
+
+                "filename": filename,
+
+                "extension": (
+                    extension
+                    if extension
+                    else "None"
+                ),
+
+                "size": size_display,
+
+                "hash": file_hash,
+
+                "file_type": file_type,
+
+                "score": score,
+
+                "verdict": verdict,
+
+                "findings": findings,
+
+                "recommendation": recommendation
+            }
+
+    return render_template(
+        "file_scanner.html",
+        result=result
+    )
 
 # ==========================================
 # SCAN HISTORY
