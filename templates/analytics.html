@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Security Analytics | Sentinel AI XDR</title>
+
+    <link rel="icon"
+          type="image/png"
+          href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+        /* =====================================================
+           ANALYTICS PAGE
+        ===================================================== */
+
+        .analytics-page {
+            min-height: 100vh;
+            background: #070b14;
+        }
+
+        .analytics-main {
+            padding: 30px 38px 50px;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-heading small {
+            display: block;
+            color: #4d8dff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .analytics-heading h1 {
+            margin: 0;
+            color: #f5f7ff;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .analytics-heading p {
+            margin: 8px 0 0;
+            color: #7f8aa3;
+            font-size: 13px;
+        }
+
+        .analytics-dashboard-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 17px;
+            border-radius: 9px;
+            text-decoration: none;
+            color: #ffffff;
+            background: linear-gradient(135deg, #4d7cff, #8b5cf6);
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(79, 112, 255, 0.20);
+            transition: 0.2s ease;
+        }
+
+        .analytics-dashboard-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(79, 112, 255, 0.30);
+        }
+
+        /* =====================================================
+           STAT CARDS
+        ===================================================== */
+
+        .analytics-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-stat {
+            position: relative;
+            overflow: hidden;
+            background: #101624;
+            border: 1px solid #1c2536;
+            border-radius: 14px;
+            padding: 21px;
+            min-height: 125px;
+            transition: 0.2s ease;
+        }
+
+        .analytics-stat:hover {
+            transform: translateY(-2px);
+            border-color: #2b3b59;
+        }
+
+        .analytics-stat::after {
+            content: "";
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            right: -35px;
+            top: -35px;
+            border-radius: 50%;
+            background: rgba(77, 124, 255, 0.05);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: #7e8aa2;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .stat-icon {
+            width: 31px;
+            height: 31px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #17233b;
+            color: #75a2ff;
+            font-size: 14px;
+        }
+
+        .analytics-stat h2 {
+            margin: 15px 0 4px;
+            color: #f5f7ff;
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .stat-description {
+            color: #65728a;
+            font-size: 10px;
+        }
+
+        .stat-safe h2 {
+            color: #35d98b;
+        }
+
+        .stat-suspicious h2 {
+            color: #f5b83d;
+        }
+
+        .stat-danger h2 {
+            color: #ff5f70;
+        }
+
+        /* =====================================================
+           MAIN GRID
+        ===================================================== */
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.9fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-card {
+            background: #101624;
+            border: 1px solid #1c2536;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .card-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 22px;
+        }
+
+        .card-heading h2 {
+            margin: 0;
+            color: #f2f5fb;
+            font-size: 16px;
+        }
+
+        .card-heading p {
+            margin: 5px 0 0;
+            color: #68758d;
+            font-size: 11px;
+        }
+
+        .card-badge {
+            padding: 6px 9px;
+            border-radius: 7px;
+            color: #7ea7ff;
+            background: rgba(77, 124, 255, 0.08);
+            border: 1px solid rgba(77, 124, 255, 0.12);
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        /* =====================================================
+           RISK SCORE
+        ===================================================== */
+
+        .score-section {
+            padding-top: 4px;
+        }
+
+        .score-number {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .score-number strong {
+            color: #f4f7ff;
+            font-size: 42px;
+            line-height: 1;
+        }
+
+        .score-number span {
+            color: #69768c;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .score-progress {
+            height: 9px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #1a2333;
+        }
+
+        .score-progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            background: linear-gradient(
+                90deg,
+                #35d98b,
+                #4d8dff,
+                #8b5cf6
+            );
+            transition: width 1s ease;
+        }
+
+        .score-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: #68758d;
+            font-size: 10px;
+        }
+
+        /* =====================================================
+           RISK STATUS
+        ===================================================== */
+
+        .risk-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 185px;
+        }
+
+        .risk-circle {
+            width: 130px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    circle,
+                    #101624 56%,
+                    transparent 57%
+                ),
+                conic-gradient(
+                    #35d98b 0deg,
+                    #35d98b 250deg,
+                    #1d293a 250deg,
+                    #1d293a 360deg
+                );
+        }
+
+        .risk-circle::before {
+            content: "";
+            position: absolute;
+            inset: 9px;
+            border-radius: 50%;
+            background: #101624;
+            border: 1px solid #202c40;
+        }
+
+        .risk-circle-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .risk-circle-content strong {
+            display: block;
+            color: #35d98b;
+            font-size: 17px;
+        }
+
+        .risk-circle-content span {
+            color: #647188;
+            font-size: 9px;
+        }
+
+        .risk-caption {
+            margin-top: 12px;
+            color: #66738b;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        /* =====================================================
+           DISTRIBUTION
+        ===================================================== */
+
+        .distribution-card {
+            margin-bottom: 20px;
+        }
+
+        .distribution-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .distribution-item {
+            padding: 17px;
+            border-radius: 11px;
+            background: #141b29;
+            border: 1px solid #202a3d;
+        }
+
+        .distribution-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .distribution-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a9b3c5;
+            font-size: 11px;
+        }
+
+        .distribution-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .dot-safe {
+            background: #35d98b;
+        }
+
+        .dot-warning {
+            background: #f5b83d;
+        }
+
+        .dot-danger {
+            background: #ff5f70;
+        }
+
+        .distribution-count {
+            color: #f2f5fb;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .distribution-bar {
+            height: 5px;
+            background: #202a3a;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .distribution-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            transition: width 0.8s ease;
+        }
+
+        .fill-safe {
+            background: #35d98b;
+        }
+
+        .fill-warning {
+            background: #f5b83d;
+        }
+
+        .fill-danger {
+            background: #ff5f70;
+        }
+
+        /* =====================================================
+           INSIGHTS
+        ===================================================== */
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .insight {
+            padding: 17px;
+            border-radius: 11px;
+            background: #141b29;
+            border: 1px solid #202a3d;
+        }
+
+        .insight-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            background: #17233b;
+            color: #75a2ff;
+        }
+
+        .insight h3 {
+            margin: 0 0 6px;
+            color: #edf1f8;
+            font-size: 12px;
+        }
+
+        .insight p {
+            margin: 0;
+            color: #68758d;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .analytics-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .analytics-main {
+                padding: 20px 15px 40px;
+            }
+
+            .analytics-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .analytics-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .distribution-list,
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-heading h1 {
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body class="dashboard-page analytics-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <a href="{{ url_for('dashboard') }}"
+               class="brand">
+
+                <span class="brand-icon">🛡️</span>
+
+                <span>SENTINEL</span>
+
+                <small>AI XDR</small>
+
+            </a>
+
+        </div>
+
+
+        <div class="sidebar-section">
+            MAIN
+        </div>
+
+
+        <nav>
+
+            <a href="/dashboard"
+               class="nav-item">
+
+                <span>▣</span>
+                Dashboard
+
+            </a>
+
+
+            <a href="/threats"
+               class="nav-item">
+
+                <span>◉</span>
+                Threats
+
+            </a>
+
+
+            <a href="/url-scanner"
+               class="nav-item">
+
+                <span>⌕</span>
+                URL Scanner
+
+            </a>
+
+
+            <a href="/scan-history"
+               class="nav-item">
+
+                <span>▤</span>
+                Scan History
+
+            </a>
+
+
+            <a href="/phishing-detector"
+               class="nav-item">
+
+                <span>△</span>
+                Phishing Detector
+
+            </a>
+
+
+            <a href="/password-auditor"
+               class="nav-item">
+
+                <span>◇</span>
+                Password Auditor
+
+            </a>
+
+
+            <a href="/file-scanner"
+               class="nav-item">
+
+                <span>▣</span>
+                File Scanner
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-section">
+            INTELLIGENCE
+        </div>
+
+
+        <nav>
+
+            <a href="/reports"
+               class="nav-item">
+
+                <span>▤</span>
+                Reports
+
+            </a>
+
+
+            <a href="/analytics"
+               class="nav-item active">
+
+                <span>◦</span>
+                Analytics
+
+            </a>
+
+
+            <a href="#"
+               class="nav-item">
+
+                <span>✦</span>
+                AI Assistant
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#"
+               class="nav-item">
+
+                <span>⚙</span>
+                Settings
+
+            </a>
+
+
+            <a href="/logout"
+               class="nav-item logout">
+
+                <span>↪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <div class="analytics-main">
+
+
+            <!-- HEADER -->
+
+            <header class="analytics-header">
+
+                <div class="analytics-heading">
+
+                    <small>
+                        SECURITY INTELLIGENCE
+                    </small>
+
+                    <h1>
+                        Security Analytics
+                    </h1>
+
+                    <p>
+                        Detailed analysis of your security activity and scan performance.
+                    </p>
+
+                </div>
+
+
+                <a href="/dashboard"
+                   class="analytics-dashboard-btn">
+
+                    ← Dashboard
+
+                </a>
+
+            </header>
+
+
+            <!-- =================================================
+                 STATISTICS
+            ================================================== -->
+
+            <section class="analytics-stats">
+
+
+                <div class="analytics-stat">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Total Scans
+                        </span>
+
+                        <div class="stat-icon">
+                            ◉
+                        </div>
+
+                    </div>
+
+                    <h2>
+                        {{ total_scans }}
+                    </h2>
+
+                    <span class="stat-description">
+                        Security scans performed
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-stat stat-safe">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Safe Scans
+                        </span>
+
+                        <div class="stat-icon">
+                            ✓
+                        </div>
+
+                    </div>
+
+                    <h2>
+                        {{ safe_scans }}
+                    </h2>
+
+                    <span class="stat-description">
+                        No major threats detected
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-stat stat-suspicious">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Suspicious
+                        </span>
+
+                        <div class="stat-icon">
+                            !
+                        </div>
+
+                    </div>
+
+                    <h2>
+                        {{ suspicious_scans }}
+                    </h2>
+
+                    <span class="stat-description">
+                        Requires attention
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-stat stat-danger">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            High Risk
+                        </span>
+
+                        <div class="stat-icon">
+                            ⚠
+                        </div>
+
+                    </div>
+
+                    <h2>
+                        {{ high_risk_scans }}
+                    </h2>
+
+                    <span class="stat-description">
+                        High-risk detections
+                    </span>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 RISK OVERVIEW
+            ================================================== -->
+
+            <section class="analytics-grid">
+
+
+                <!-- SCORE -->
+
+                <div class="analytics-card">
+
+                    <div class="card-heading">
+
+                        <div>
+
+                            <h2>
+                                Security Risk Analysis
+                            </h2>
+
+                            <p>
+                                Overall analysis based on your saved scans.
+                            </p>
+
+                        </div>
+
+                        <span class="card-badge">
+                            LIVE DATA
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-section">
+
+                        <div class="score-number">
+
+                            <strong>
+                                {{ average_score }}
+                            </strong>
+
+                            <span>
+                                / 100 average risk score
+                            </span>
+
+                        </div>
+
+
+                        <div class="score-progress">
+
+                            <div
+                                id="scoreBar"
+                                class="score-progress-fill"
+                                data-score="{{ average_score }}">
+                            </div>
+
+                        </div>
+
+
+                        <div class="score-meta">
+
+                            <span>
+                                Low Risk
+                            </span>
+
+                            <span>
+                                Higher Risk
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RISK STATUS -->
+
+                <div class="analytics-card">
+
+                    <div class="card-heading">
+
+                        <div>
+
+                            <h2>
+                                Current Risk Level
+                            </h2>
+
+                            <p>
+                                Based on recent scan activity.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="risk-status">
+
+                        <div class="risk-circle">
+
+                            <div class="risk-circle-content">
+
+                                {% if average_score >= 60 %}
+
+                                    <strong style="color:#ff5f70;">
+                                        HIGH
+                                    </strong>
+
+                                {% elif average_score >= 30 %}
+
+                                    <strong style="color:#f5b83d;">
+                                        MEDIUM
+                                    </strong>
+
+                                {% else %}
+
+                                    <strong>
+                                        LOW
+                                    </strong>
+
+                                {% endif %}
+
+                                <span>
+                                    Risk Level
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="risk-caption">
+
+                            {% if average_score >= 60 %}
+
+                                Immediate attention recommended
+
+                            {% elif average_score >= 30 %}
+
+                                Review suspicious activity
+
+                            {% else %}
+
+                                Security environment looks healthy
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 SCAN DISTRIBUTION
+            ================================================== -->
+
+            <section class="analytics-card distribution-card">
+
+
+                <div class="card-heading">
+
+                    <div>
+
+                        <h2>
+                            Scan Distribution
+                        </h2>
+
+                        <p>
+                            Breakdown of security scan results.
+                        </p>
+
+                    </div>
+
+                    <span class="card-badge">
+                        {{ total_scans }} SCANS
+                    </span>
+
+                </div>
+
+
+                <div class="distribution-list">
+
+
+                    <!-- SAFE -->
+
+                    <div class="distribution-item">
+
+                        <div class="distribution-item-top">
+
+                            <div class="distribution-name">
+
+                                <span class="distribution-dot dot-safe"></span>
+
+                                Safe
+
+                            </div>
+
+                            <span class="distribution-count">
+                                {{ safe_scans }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="distribution-bar">
+
+                            <div
+                                id="safeBar"
+                                class="distribution-fill fill-safe"
+                                data-value="{{ safe_scans }}"
+                                data-total="{{ total_scans }}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUSPICIOUS -->
+
+                    <div class="distribution-item">
+
+                        <div class="distribution-item-top">
+
+                            <div class="distribution-name">
+
+                                <span class="distribution-dot dot-warning"></span>
+
+                                Suspicious
+
+                            </div>
+
+                            <span class="distribution-count">
+                                {{ suspicious_scans }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="distribution-bar">
+
+                            <div
+                                id="suspiciousBar"
+                                class="distribution-fill fill-warning"
+                                data-value="{{ suspicious_scans }}"
+                                data-total="{{ total_scans }}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- HIGH RISK -->
+
+                    <div class="distribution-item">
+
+                        <div class="distribution-item-top">
+
+                            <div class="distribution-name">
+
+                                <span class="distribution-dot dot-danger"></span>
+
+                                High Risk
+
+                            </div>
+
+                            <span class="distribution-count">
+                                {{ high_risk_scans }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="distribution-bar">
+
+                            <div
+                                id="highRiskBar"
+                                class="distribution-fill fill-danger"
+                                data-value="{{ high_risk_scans }}"
+                                data-total="{{ total_scans }}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SECURITY INSIGHTS
+            ================================================== -->
+
+            <section class="analytics-card">
+
+
+                <div class="card-heading">
+
+                    <div>
+
+                        <h2>
+                            Security Insights
+                        </h2>
+
+                        <p>
+                            Quick interpretation of your current scan activity.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="insights-grid">
+
+
+                    <div class="insight">
+
+                        <div class="insight-icon">
+                            ✓
+                        </div>
+
+                        <h3>
+                            Safe Activity
+                        </h3>
+
+                        <p>
+
+                            {{ safe_scans }} scan(s) were classified as safe
+                            with no major security threat detected.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="insight">
+
+                        <div class="insight-icon">
+                            !
+                        </div>
+
+                        <h3>
+                            Suspicious Activity
+                        </h3>
+
+                        <p>
+
+                            {{ suspicious_scans }} scan(s) require additional
+                            attention based on their security findings.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="insight">
+
+                        <div class="insight-icon">
+                            ⚠
+                        </div>
+
+                        <h3>
+                            High Risk Activity
+                        </h3>
+
+                        <p>
+
+                            {{ high_risk_scans }} high-risk detection(s)
+                            were identified in your saved scan history.
+
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            /* ===============================
+               AVERAGE SCORE BAR
+            =============================== */
+
+            const scoreBar =
+                document.getElementById("scoreBar");
+
+            if (scoreBar) {
+
+                const score =
+                    parseFloat(scoreBar.dataset.score) || 0;
+
+                const safeScore =
+                    Math.max(0, Math.min(100, score));
+
+                setTimeout(function () {
+
+                    scoreBar.style.width =
+                        safeScore + "%";
+
+                }, 150);
+
+            }
+
+
+            /* ===============================
+               DISTRIBUTION BARS
+            =============================== */
+
+            const distributionBars = [
+                document.getElementById("safeBar"),
+                document.getElementById("suspiciousBar"),
+                document.getElementById("highRiskBar")
+            ];
+
+
+            distributionBars.forEach(function (bar) {
+
+                if (!bar) {
+                    return;
+                }
+
+                const value =
+                    parseFloat(bar.dataset.value) || 0;
+
+                const total =
+                    parseFloat(bar.dataset.total) || 0;
+
+                let percentage = 0;
+
+                if (total > 0) {
+
+                    percentage =
+                        (value / total) * 100;
+
+                }
+
+                percentage =
+                    Math.max(
+                        0,
+                        Math.min(100, percentage)
+                    );
+
+
+                setTimeout(function () {
+
+                    bar.style.width =
+                        percentage + "%";
+
+                }, 250);
+
+            });
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>

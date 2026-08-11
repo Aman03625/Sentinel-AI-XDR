@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import requests
 import os
 import re
+from google import genai
 
 
 # ==========================================
@@ -16,6 +17,12 @@ import re
 # ==========================================
 
 load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if GEMINI_API_KEY:
+    gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+else:
+    gemini_client = None
 
 
 # ==========================================
@@ -511,6 +518,22 @@ def dashboard():
         chart_data=chart_data,
 
         recent_scans=recent_scans
+    )
+# ==========================================
+# SETTINGS
+# ==========================================
+
+@app.route("/settings")
+def settings():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user = User.query.get(session["user_id"])
+
+    return render_template(
+        "settings.html",
+        user=user
     )
 
 
@@ -1237,6 +1260,47 @@ def phishing_detector():
         "phishing_detector.html",
         result=result
     )
+# ==========================================
+# SENTINEL AI - SECURITY CONTEXT
+# ==========================================
+
+def get_security_context(user_id):
+
+    scans = URLScan.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        URLScan.created_at.desc()
+    ).limit(10).all()
+
+    if not scans:
+        return "No security scans are available for this user."
+
+    context = []
+
+    for index, scan in enumerate(scans, start=1):
+
+        context.append(
+            f"""
+Scan #{index}
+URL: {scan.url}
+Risk Score: {scan.score}/100
+Verdict: {scan.verdict}
+Created At: {scan.created_at}
+Findings:
+{scan.findings or "No findings available."}
+
+Google Safe Browsing Checked:
+{scan.safe_browsing_checked}
+
+Google Safe Browsing Safe:
+{scan.safe_browsing_safe}
+
+Google Safe Browsing Threats:
+{scan.safe_browsing_threats or "None"}
+"""
+        )
+
+    return "\n".join(context)
 def analyze_password(password):
 
     import math
@@ -1816,7 +1880,320 @@ def file_scanner():
         "file_scanner.html",
         result=result
     )
+# ==========================================
+# THREATS
+# ==========================================
 
+@app.route("/threats")
+def threats():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    scans = URLScan.query.filter_by(
+        user_id=session["user_id"]
+    ).filter(
+        URLScan.verdict.in_([
+            "SUSPICIOUS",
+            "HIGH RISK"
+        ])
+    ).order_by(
+        URLScan.created_at.desc()
+    ).all()
+
+    return render_template(
+        "threats.html",
+        scans=scans
+    )
+
+# ==========================================
+# REPORTS
+# ==========================================
+
+@app.route("/reports")
+def reports():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    scans = URLScan.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(
+        URLScan.created_at.desc()
+    ).all()
+
+    # Statistics
+    total_scans = len(scans)
+
+    safe_scans = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SAFE"
+    )
+
+    suspicious_scans = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SUSPICIOUS"
+    )
+
+    high_risk_scans = sum(
+        1
+        for scan in scans
+        if scan.verdict == "HIGH RISK"
+    )
+
+    # Average security risk score
+    if total_scans > 0:
+
+        average_score = round(
+            sum(scan.score for scan in scans)
+            / total_scans
+        )
+
+    else:
+
+        average_score = 0
+
+    return render_template(
+        "reports.html",
+
+        scans=scans,
+
+        total_scans=total_scans,
+
+        safe_scans=safe_scans,
+
+        suspicious_scans=suspicious_scans,
+
+        high_risk_scans=high_risk_scans,
+
+        average_score=average_score
+    )
+# ==========================================
+# ANALYTICS
+# ==========================================
+
+@app.route("/analytics")
+def analytics():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    scans = URLScan.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(
+        URLScan.created_at.desc()
+    ).all()
+
+    total_scans = len(scans)
+
+    safe_scans = sum(
+        1 for scan in scans
+        if scan.verdict == "SAFE"
+    )
+
+    suspicious_scans = sum(
+        1 for scan in scans
+        if scan.verdict == "SUSPICIOUS"
+    )
+
+    high_risk_scans = sum(
+        1 for scan in scans
+        if scan.verdict == "HIGH RISK"
+    )
+
+    # Average score
+    if total_scans > 0:
+        average_score = round(
+            sum(scan.score for scan in scans)
+            / total_scans
+        )
+    else:
+        average_score = 0
+
+    # ==============================
+    # LAST 7 DAYS
+    # ==============================
+
+    today = datetime.utcnow().date()
+
+    chart_labels = []
+    chart_data = []
+
+    for i in range(6, -1, -1):
+
+        day = today - timedelta(days=i)
+
+        count = sum(
+            1
+            for scan in scans
+            if scan.created_at
+            and scan.created_at.date() == day
+        )
+
+        chart_labels.append(
+            day.strftime("%a")
+        )
+
+        chart_data.append(count)
+
+    return render_template(
+        "analytics.html",
+
+        scans=scans,
+
+        total_scans=total_scans,
+
+        safe_scans=safe_scans,
+
+        suspicious_scans=suspicious_scans,
+
+        high_risk_scans=high_risk_scans,
+
+        average_score=average_score,
+
+        chart_labels=chart_labels,
+
+        chart_data=chart_data
+    )
+# ==========================================
+# AI ASSISTANT
+# ==========================================
+
+@app.route("/ai-assistant", methods=["GET", "POST"])
+def ai_assistant():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    answer = None
+    error = None
+    question = ""
+
+    if request.method == "POST":
+
+        question = request.form.get(
+            "question",
+            ""
+        ).strip()
+
+        print("==========================================")
+        print("SENTINEL AI REQUEST")
+        print("QUESTION:", question)
+
+        # --------------------------------------
+        # EMPTY QUESTION
+        # --------------------------------------
+
+        if not question:
+
+            error = "Please enter a question."
+
+            print("ERROR: Empty question")
+
+        # --------------------------------------
+        # GEMINI NOT CONFIGURED
+        # --------------------------------------
+
+        elif gemini_client is None:
+
+            error = "Gemini API key is not configured."
+
+            print("ERROR: Gemini client is not configured.")
+
+        else:
+
+            try:
+
+                # --------------------------------------
+                # GET USER SECURITY DATA
+                # --------------------------------------
+
+                security_context = get_security_context(
+                    session["user_id"]
+                )
+
+                print("Security context loaded.")
+
+                # --------------------------------------
+                # SENTINEL SYSTEM PROMPT
+                # --------------------------------------
+
+                prompt = f"""
+You are Sentinel AI, the cybersecurity assistant
+inside the Sentinel AI XDR security platform.
+
+Your job is to help the authenticated user understand
+their security activity and provide safe cybersecurity
+guidance.
+
+IMPORTANT RULES:
+
+1. Never reveal passwords or sensitive credentials.
+2. Do not invent scan results.
+3. Only use the provided Sentinel scan data when
+   discussing the user's scans.
+4. Clearly distinguish between facts from Sentinel
+   and general cybersecurity advice.
+5. Explain technical concepts in simple language.
+6. If a scan is HIGH RISK, explain why and recommend
+   safe defensive actions.
+7. Never claim that a URL is malicious unless the
+   provided scan data supports that conclusion.
+8. Do not provide instructions for attacking systems,
+   stealing credentials, bypassing security controls,
+   or deploying malware.
+9. Focus on defensive cybersecurity.
+
+USER QUESTION:
+{question}
+
+USER'S RECENT SENTINEL SECURITY SCANS:
+{security_context}
+
+Now answer the user's question clearly and professionally.
+If the question is about their scans, use the scan data above.
+"""
+
+                print("Sending request to Gemini...")
+
+                # --------------------------------------
+                # GEMINI
+                # --------------------------------------
+
+                response = gemini_client.models.generate_content(
+
+                    model="gemini-3.5-flash",
+
+                    contents=prompt
+                )
+
+                answer = response.text
+
+                print("Gemini response received.")
+
+                print("==========================================")
+
+            except Exception as e:
+
+                print("==========================================")
+                print("SENTINEL AI ERROR")
+                print(type(e).__name__)
+                print(str(e))
+                print("==========================================")
+
+                error = (
+                    "Unable to process your request. "
+                    "Please check the server terminal."
+                )
+
+    return render_template(
+        "ai_assistant.html",
+        answer=answer,
+        error=error,
+        question=question
+    )
 # ==========================================
 # SCAN HISTORY
 # ==========================================

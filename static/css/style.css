@@ -4939,3 +4939,59 @@ footer {
     margin-bottom: 6px;
     line-height: 1.4;
 }
+/* ==========================================
+   SETTINGS
+========================================== */
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.settings-row strong {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.settings-row small {
+    color: #7f8ba8;
+    font-size: 12px;
+}
+
+.settings-row > span {
+    color: #b9c4df;
+    font-size: 13px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    font-size: 11px !important;
+
+    font-weight: 600;
+}
+
+.status-badge.safe {
+    color: #38e08f !important;
+
+    background: rgba(16,185,129,0.10);
+
+    border: 1px solid rgba(16,185,129,0.20);
+}

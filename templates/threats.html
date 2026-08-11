@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Threats | Sentinel</title>
+      <link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #070b14;
+            color: #f5f7ff;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 185px;
+            background: #090e19;
+            border-right: 1px solid #20283a;
+            padding: 28px 10px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #315dff;
+            margin-bottom: 32px;
+            padding-left: 10px;
+        }
+
+        .section-title {
+            font-size: 9px;
+            color: #536079;
+            letter-spacing: 1px;
+            margin: 16px 10px 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #8c97b0;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #141b2c;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(
+                90deg,
+                #20204a,
+                #181b3b
+            );
+            color: white;
+            border: 1px solid #34346b;
+        }
+
+        .nav-item span {
+            width: 14px;
+            text-align: center;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 18px;
+            left: 10px;
+            right: 10px;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 185px;
+            width: calc(100% - 185px);
+            padding: 30px 38px;
+        }
+
+        .breadcrumb {
+            color: #536079;
+            font-size: 9px;
+            margin-bottom: 28px;
+        }
+
+        .label {
+            color: #4c82ff;
+            font-size: 9px;
+            letter-spacing: 1.2px;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .subtitle {
+            color: #78849d;
+            font-size: 11px;
+            margin-top: 8px;
+            margin-bottom: 30px;
+        }
+
+        /* =========================
+           STAT CARDS
+        ========================= */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 13px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: #101622;
+            border: 1px solid #232c3e;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-title {
+            color: #69758d;
+            font-size: 9px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .red {
+            color: #ff536e;
+        }
+
+        .orange {
+            color: #ffb52e;
+        }
+
+        .blue {
+            color: #5790ff;
+        }
+
+        /* =========================
+           THREATS PANEL
+        ========================= */
+
+        .panel {
+            background: #0d131f;
+            border: 1px solid #232c3e;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #20283a;
+            padding-bottom: 17px;
+            margin-bottom: 5px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .panel-subtitle {
+            color: #65718a;
+            font-size: 9px;
+            margin-top: 5px;
+        }
+
+        .threat-card {
+            padding: 20px 5px;
+            border-bottom: 1px solid #20283a;
+        }
+
+        .threat-card:last-child {
+            border-bottom: none;
+        }
+
+        .threat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .threat-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .threat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #291521;
+            color: #ff536e;
+            font-size: 16px;
+        }
+
+        .threat-info h3 {
+            margin: 0;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .threat-info p {
+            margin: 5px 0 0;
+            color: #66728b;
+            font-size: 9px;
+        }
+
+        .risk {
+            padding: 6px 11px;
+            border-radius: 6px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .risk.high {
+            background: #321521;
+            color: #ff536e;
+            border: 1px solid #5d2638;
+        }
+
+        .risk.medium {
+            background: #302713;
+            color: #ffb52e;
+            border: 1px solid #59451c;
+        }
+
+        .details {
+            margin-top: 15px;
+            margin-left: 51px;
+            background: #121925;
+            border: 1px solid #202a3d;
+            border-radius: 8px;
+            padding: 13px;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 9px;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #ff536e;
+        }
+
+        .finding {
+            color: #8994aa;
+            font-size: 9px;
+            line-height: 1.7;
+            margin: 3px 0;
+        }
+
+        .safe-browsing {
+            margin-top: 10px;
+            padding: 9px;
+            border-radius: 6px;
+            background: #291521;
+            color: #ff7185;
+            font-size: 8px;
+        }
+
+        .date {
+            color: #58647b;
+            font-size: 8px;
+            margin-top: 10px;
+        }
+
+        /* =========================
+           EMPTY STATE
+        ========================= */
+
+        .empty {
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .empty-icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .empty h2 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty p {
+            color: #66728b;
+            font-size: 10px;
+        }
+
+        .scan-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+            background: linear-gradient(
+                90deg,
+                #4c82ff,
+                #8655ef
+            );
+            color: white;
+            font-size: 10px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 160px;
+            }
+
+            .main {
+                margin-left: 160px;
+                width: calc(100% - 160px);
+                padding: 25px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🛡 SENTINEL
+        </div>
+
+        <div class="section-title">
+            MAIN
+        </div>
+
+        <a href="/dashboard" class="nav-item">
+            <span>⌂</span>
+            Dashboard
+        </a>
+
+        <a href="/threats" class="nav-item active">
+            <span>◉</span>
+            Threats
+        </a>
+
+        <a href="/url-scanner" class="nav-item">
+            <span>⌕</span>
+            URL Scanner
+        </a>
+
+        <a href="/scan-history" class="nav-item">
+            <span>▣</span>
+            Scan History
+        </a>
+
+        <a href="/phishing-detector" class="nav-item">
+            <span>△</span>
+            Phishing Detector
+        </a>
+
+        <a href="/password-auditor" class="nav-item">
+            <span>◇</span>
+            Password Auditor
+        </a>
+
+        <a href="/file-scanner" class="nav-item">
+            <span>▣</span>
+            File Scanner
+        </a>
+
+        <div class="section-title">
+            INTELLIGENCE
+        </div>
+
+        <a href="/reports" class="nav-item">
+            <span>▤</span>
+            Reports
+        </a>
+
+        <a href="/analytics" class="nav-item">
+            <span>◦</span>
+            Analytics
+        </a>
+
+        <a href="/ai-assistant" class="nav-item">
+            <span>✦</span>
+            AI Assistant
+        </a>
+
+        <div class="bottom-nav">
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+            <a href="/logout" class="nav-item">
+                <span>↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================= -->
+
+    <main class="main">
+
+        <div class="breadcrumb">
+            Sentinel / Intelligence / Threats
+        </div>
+
+        <div class="label">
+            SECURITY INTELLIGENCE
+        </div>
+
+        <h1>Threat Detection</h1>
+
+        <div class="subtitle">
+            Review suspicious and high-risk security events detected by Sentinel.
+        </div>
+
+
+        <!-- =========================
+             STATISTICS
+        ========================= -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    Total Threats
+                </div>
+
+                <div class="stat-number red">
+                    {{ scans|length }}
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    High Risk
+                </div>
+
+                <div class="stat-number red">
+                    {{ scans|selectattr("verdict", "equalto", "HIGH RISK")|list|length }}
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    Suspicious
+                </div>
+
+                <div class="stat-number orange">
+                    {{ scans|selectattr("verdict", "equalto", "SUSPICIOUS")|list|length }}
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             THREAT LIST
+        ========================= -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-title">
+                        Detected Threats
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Security threats detected from your saved scans.
+                    </div>
+                </div>
+
+            </div>
+
+
+            {% if scans %}
+
+                {% for scan in scans %}
+
+                <div class="threat-card">
+
+                    <div class="threat-top">
+
+                        <div class="threat-left">
+
+                            <div class="threat-icon">
+                                ⚠
+                            </div>
+
+                            <div class="threat-info">
+
+                                <h3>
+                                    {{ scan.url }}
+                                </h3>
+
+                                <p>
+                                    URL Security Scan
+                                    • Sentinel XDR
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {% if scan.verdict == "HIGH RISK" %}
+
+                            <div class="risk high">
+                                HIGH RISK
+                            </div>
+
+                        {% else %}
+
+                            <div class="risk medium">
+                                SUSPICIOUS
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="details">
+
+                        <div class="score-row">
+
+                            <span>
+                                Risk Score
+                            </span>
+
+                            <span class="score">
+                                {{ scan.score }}/100
+                            </span>
+
+                        </div>
+
+
+                        {% if scan.findings %}
+
+                            {% for finding in scan.findings.split('\n') %}
+
+                                {% if finding.strip() %}
+
+                                <div class="finding">
+                                    • {{ finding }}
+                                </div>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        {% endif %}
+
+
+                        {% if scan.safe_browsing_threats %}
+
+                            <div class="safe-browsing">
+
+                                ⚠ Google Safe Browsing:
+                                {{ scan.safe_browsing_threats }}
+
+                            </div>
+
+                        {% elif scan.safe_browsing_checked %}
+
+                            <div class="safe-browsing">
+
+                                ✓ Google Safe Browsing:
+                                Known threat detected.
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="date">
+
+                            Detected:
+                            {{ scan.created_at.strftime("%d %b %Y, %H:%M") }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty">
+
+                    <div class="empty-icon">
+                        🛡
+                    </div>
+
+                    <h2>
+                        No threats detected
+                    </h2>
+
+                    <p>
+                        Your account currently has no suspicious
+                        or high-risk security events.
+                    </p>
+
+                    <a href="/url-scanner" class="scan-btn">
+                        + New Scan
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
