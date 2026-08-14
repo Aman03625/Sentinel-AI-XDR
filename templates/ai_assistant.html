@@ -637,6 +637,94 @@
                 gap: 7px;
             }
         }
+        /* =====================================================
+   SECURITY ANALYSIS BUTTON
+===================================================== */
+
+.security-analysis-btn {
+    margin-left: auto;
+    margin-right: 15px;
+
+    padding: 10px 16px;
+
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(14, 165, 233, 0.15),
+        rgba(37, 99, 235, 0.15)
+    );
+
+    color: #7dd3fc;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    box-shadow:
+        0 0 15px rgba(14, 165, 233, 0.08);
+}
+
+.security-analysis-btn:hover {
+    transform: translateY(-2px);
+
+    border-color: #38bdf8;
+
+    color: white;
+
+    background: linear-gradient(
+        135deg,
+        rgba(14, 165, 233, 0.25),
+        rgba(37, 99, 235, 0.25)
+    );
+
+    box-shadow:
+        0 0 25px rgba(14, 165, 233, 0.25);
+}
+
+.security-analysis-btn:active {
+    transform: scale(0.97);
+}
+
+.security-analysis-btn.loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+/* =====================================================
+   SECURITY RECOMMENDATIONS BUTTON
+===================================================== */
+
+.recommendation-btn {
+    border-color: rgba(167, 139, 250, 0.35);
+
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.15),
+        rgba(79, 70, 229, 0.15)
+    );
+
+    color: #c4b5fd;
+}
+
+.recommendation-btn:hover {
+
+    border-color: #a78bfa;
+
+    color: white;
+
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.25),
+        rgba(79, 70, 229, 0.25)
+    );
+
+    box-shadow:
+        0 0 25px rgba(139, 92, 246, 0.25);
+}
 
     </style>
 
@@ -777,6 +865,22 @@
                     Online
 
                 </div>
+                <button
+    type="button"
+    class="security-analysis-btn"
+    onclick="analyzeMySecurity()">
+
+    🛡️ Analyze My Security
+
+</button>
+<button 
+    type="button" 
+    class="security-analysis-btn recommendation-btn"
+    onclick="getSecurityRecommendations()">
+
+    💡 Security Recommendations
+
+</button>
 
             </div>
 
@@ -1408,6 +1512,472 @@ function copyAnswer() {
         );
 
     }
+
+}
+/* =====================================================
+   SECURITY ANALYSIS
+===================================================== */
+
+async function analyzeMySecurity() {
+
+    const button =
+        document.querySelector(".security-analysis-btn");
+
+    const messages =
+        document.getElementById("messages");
+
+    if (!button || !messages) return;
+
+
+    /* Loading state */
+
+    button.disabled = true;
+    button.classList.add("loading");
+
+    button.innerHTML = "⏳ Analyzing...";
+
+
+    /* User-style message */
+
+    const userMessage =
+        document.createElement("div");
+
+    userMessage.className = "message";
+
+    userMessage.innerHTML = `
+
+        <div class="avatar user">
+            👤
+        </div>
+
+        <div class="message-content">
+
+            <div class="message-name">
+                You
+            </div>
+
+            <div class="user-text">
+                Analyze my security
+            </div>
+
+        </div>
+    `;
+
+    messages.appendChild(userMessage);
+
+
+    /* AI loading message */
+
+    const loadingMessage =
+        document.createElement("div");
+
+    loadingMessage.className = "message";
+
+    loadingMessage.innerHTML = `
+
+        <div class="avatar ai">
+            ✦
+        </div>
+
+        <div class="message-content">
+
+            <div class="message-name">
+                Sentinel AI
+            </div>
+
+            <div class="typing">
+
+                Analyzing your security
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </div>
+
+        </div>
+    `;
+
+    messages.appendChild(loadingMessage);
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+
+    try {
+
+        const response =
+            await fetch("/ai-security-analysis", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                }
+
+            });
+
+
+        const data =
+            await response.json();
+
+
+        /* Remove loading message */
+
+        loadingMessage.remove();
+
+
+        /* AI response */
+
+        const aiMessage =
+            document.createElement("div");
+
+        aiMessage.className =
+            "message";
+
+        aiMessage.innerHTML = `
+
+            <div class="avatar ai">
+                ✦
+            </div>
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    Sentinel AI
+                </div>
+
+                <div class="ai-response">
+
+                    ${formatAIText(
+                        data.answer ||
+                        data.error ||
+                        "Unable to analyze security."
+                    )}
+
+                </div>
+
+            </div>
+        `;
+
+        messages.appendChild(aiMessage);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+
+    } catch (error) {
+
+        loadingMessage.remove();
+
+        const errorMessage =
+            document.createElement("div");
+
+        errorMessage.className =
+            "message";
+
+        errorMessage.innerHTML = `
+
+            <div class="avatar ai">
+                ✦
+            </div>
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    Sentinel AI
+                </div>
+
+                <div class="ai-error">
+
+                    ⚠️ Unable to analyze
+                    your security right now.
+
+                </div>
+
+            </div>
+        `;
+
+        messages.appendChild(
+            errorMessage
+        );
+
+    }
+
+
+    /* Reset button */
+
+    button.disabled = false;
+
+    button.classList.remove("loading");
+
+    button.innerHTML =
+        "🛡️ Analyze My Security";
+
+}
+/* =====================================================
+   AI SECURITY RECOMMENDATIONS
+===================================================== */
+
+async function getSecurityRecommendations() {
+
+    const button =
+        document.querySelector(".recommendation-btn");
+
+    const messages =
+        document.getElementById("messages");
+
+
+    if (!button || !messages) return;
+
+
+    /* -----------------------------------------
+       LOADING STATE
+    ----------------------------------------- */
+
+    button.disabled = true;
+
+    button.classList.add("loading");
+
+    button.innerHTML =
+        "⏳ Generating...";
+
+
+    /* -----------------------------------------
+       USER MESSAGE
+    ----------------------------------------- */
+
+    const userMessage =
+        document.createElement("div");
+
+    userMessage.className =
+        "message";
+
+
+    userMessage.innerHTML = `
+
+        <div class="avatar user">
+            👤
+        </div>
+
+        <div class="message-content">
+
+            <div class="message-name">
+                You
+            </div>
+
+            <div class="user-text">
+                Give me personalized security recommendations
+            </div>
+
+        </div>
+
+    `;
+
+
+    messages.appendChild(
+        userMessage
+    );
+
+
+    /* -----------------------------------------
+       AI LOADING MESSAGE
+    ----------------------------------------- */
+
+    const loadingMessage =
+        document.createElement("div");
+
+    loadingMessage.className =
+        "message";
+
+
+    loadingMessage.innerHTML = `
+
+        <div class="avatar ai">
+            ✦
+        </div>
+
+        <div class="message-content">
+
+            <div class="message-name">
+                Sentinel AI
+            </div>
+
+            <div class="typing">
+
+                Analyzing your security activity
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    messages.appendChild(
+        loadingMessage
+    );
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+
+    try {
+
+        /* -----------------------------------------
+           API REQUEST
+        ----------------------------------------- */
+
+        const response =
+            await fetch(
+                "/ai-security-recommendations",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        /* -----------------------------------------
+           REMOVE LOADING
+        ----------------------------------------- */
+
+        loadingMessage.remove();
+
+
+        /* -----------------------------------------
+           AI RESPONSE
+        ----------------------------------------- */
+
+        const aiMessage =
+            document.createElement("div");
+
+        aiMessage.className =
+            "message";
+
+
+        const answer =
+            data.answer ||
+            data.error ||
+            "Unable to generate recommendations.";
+
+
+        aiMessage.innerHTML = `
+
+            <div class="avatar ai">
+                ✦
+            </div>
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    Sentinel AI
+                </div>
+
+                <div class="ai-response">
+
+                    ${formatAIText(answer)}
+
+                </div>
+
+                <button
+                    class="copy-btn"
+                    onclick="copyDynamicResponse(this)">
+
+                    📋 Copy recommendations
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        messages.appendChild(
+            aiMessage
+        );
+
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+
+    } catch (error) {
+
+        console.error(
+            "Recommendation Error:",
+            error
+        );
+
+
+        loadingMessage.remove();
+
+
+        const errorMessage =
+            document.createElement("div");
+
+
+        errorMessage.className =
+            "message";
+
+
+        errorMessage.innerHTML = `
+
+            <div class="avatar ai">
+                ✦
+            </div>
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    Sentinel AI
+                </div>
+
+                <div class="ai-error">
+
+                    ⚠️ Unable to generate
+                    security recommendations.
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        messages.appendChild(
+            errorMessage
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       RESET BUTTON
+    ----------------------------------------- */
+
+    button.disabled = false;
+
+    button.classList.remove(
+        "loading"
+    );
+
+    button.innerHTML =
+        "💡 Security Recommendations";
 
 }
 

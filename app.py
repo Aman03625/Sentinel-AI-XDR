@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.user import db, User, URLScan
+from models.user import db, User, URLScan,SecurityAlert
 
 from urllib.parse import urlparse
 from datetime import datetime, timedelta
@@ -10,6 +10,7 @@ import requests
 import os
 import re
 from google import genai
+from flask import jsonify
 
 
 # ==========================================
@@ -31,7 +32,7 @@ else:
 
 app = Flask(__name__)
 
-app.secret_key = "sentinel-ai-xdr-secret-key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "sentinel-ai-xdr-secret-key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///sentinel.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -192,7 +193,7 @@ def check_safe_browsing(url):
             error
         )
 
-        if error.response is not None:
+        if getattr(error, "response", None) is not None:
 
             print(
                 "API RESPONSE:",
@@ -210,7 +211,26 @@ def check_safe_browsing(url):
             "message": str(error)
         }
 
+def create_security_alert(
+    user_id,
+    title,
+    message,
+    severity="LOW",
+    alert_type="GENERAL"
+):
 
+    alert = SecurityAlert(
+        user_id=user_id,
+        title=title,
+        message=message,
+        severity=severity,
+        alert_type=alert_type
+    )
+
+    db.session.add(alert)
+    db.session.commit()
+
+    return alert
 # ==========================================
 # HOME
 # ==========================================
@@ -382,7 +402,7 @@ def dashboard():
     ).all()
 
     total_scans = len(scans)
-
+     
     active_threats = sum(
 
         1
@@ -406,6 +426,7 @@ def dashboard():
     )
 
     blocked_threats = high_risk
+    
 
     # ======================================
     # SECURITY SCORE
@@ -434,6 +455,38 @@ def dashboard():
         )
 
     recent_scans = scans[:5]
+    # ======================================
+    # THREAT DISTRIBUTION
+    # ======================================
+
+    safe_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SAFE"
+    )
+
+    suspicious_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SUSPICIOUS"
+    )
+
+    high_risk_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "HIGH RISK"
+    )
+
+
+    # ======================================
+    # SECURITY ALERTS
+    # ======================================
+
+    security_alerts = SecurityAlert.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        SecurityAlert.created_at.desc()
+    ).limit(5).all()
 
     # ======================================
     # THREAT LEVEL
@@ -517,7 +570,15 @@ def dashboard():
 
         chart_data=chart_data,
 
-        recent_scans=recent_scans
+        recent_scans=recent_scans,
+           suspicious_count=suspicious_count,
+
+        high_risk_count=high_risk_count,
+
+        security_alerts=security_alerts,
+        safe_count=safe_count
+
+
     )
 # ==========================================
 # SETTINGS
@@ -2057,19 +2118,147 @@ def analytics():
 
         chart_data=chart_data
     )
+
+    
 # ==========================================
-# AI ASSISTANT
+# SENTINEL AI CYBERSECURITY ANALYST
 # ==========================================
 
 @app.route("/ai-assistant", methods=["GET", "POST"])
 def ai_assistant():
+
+    # --------------------------------------
+    # LOGIN CHECK
+    # --------------------------------------
 
     if "user_id" not in session:
         return redirect(url_for("login"))
 
     answer = None
     error = None
-    question = ""
+
+    # --------------------------------------
+    # GET CURRENT USER SCANS
+    # --------------------------------------
+
+    user_id = session["user_id"]
+
+    scans = URLScan.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        URLScan.created_at.desc()
+    ).limit(20).all()
+
+    # --------------------------------------
+    # BUILD SECURITY CONTEXT
+    # --------------------------------------
+
+    total_scans = len(scans)
+
+    safe_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SAFE"
+    )
+
+    suspicious_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "SUSPICIOUS"
+    )
+
+    high_risk_count = sum(
+        1
+        for scan in scans
+        if scan.verdict == "HIGH RISK"
+    )
+
+    # --------------------------------------
+    # RECENT SCAN DETAILS
+    # --------------------------------------
+
+    scan_context = []
+
+    for scan in scans:
+
+        scan_context.append(
+            f"""
+URL: {scan.url}
+Risk Score: {scan.score}/100
+Verdict: {scan.verdict}
+Findings: {scan.findings or "No findings recorded"}
+Safe Browsing Checked: {scan.safe_browsing_checked}
+Safe Browsing Safe: {scan.safe_browsing_safe}
+Safe Browsing Threats: {scan.safe_browsing_threats or "None"}
+Created At: {scan.created_at}
+"""
+        )
+
+    scan_context_text = "\n".join(scan_context)
+
+    # --------------------------------------
+    # SENTINEL AI SYSTEM PROMPT
+    # --------------------------------------
+
+    system_prompt = """
+You are Sentinel AI, a cybersecurity analysis assistant
+inside the Sentinel AI XDR security platform.
+
+Your job is to help the user understand their security
+activity and provide defensive cybersecurity guidance.
+
+IMPORTANT RULES:
+
+1. Never expose passwords, API keys, secrets or credentials.
+2. Never claim that a URL is definitely malicious unless
+   the available scan evidence supports that conclusion.
+3. Clearly distinguish between:
+   - SAFE
+   - SUSPICIOUS
+   - HIGH RISK
+4. Use the user's scan data when answering questions about
+   their recent threats or security activity.
+5. Give practical defensive recommendations.
+6. Do not invent scan results.
+7. If there is not enough information, say so.
+8. Keep answers understandable and structured.
+9. You are a defensive cybersecurity assistant.
+10. Do not provide instructions for harming systems,
+    stealing credentials, bypassing security or deploying
+    malware.
+
+You can analyze:
+- URL scan results
+- phishing indicators
+- Safe Browsing results
+- risk scores
+- suspicious patterns
+- security recommendations
+- general cybersecurity concepts
+
+When discussing scan history, use the supplied scan data.
+"""
+
+    # --------------------------------------
+    # SECURITY SUMMARY
+    # --------------------------------------
+
+    security_summary = f"""
+CURRENT USER SECURITY SUMMARY
+
+Total Recent Scans: {total_scans}
+Safe Scans: {safe_count}
+Suspicious Scans: {suspicious_count}
+High Risk Scans: {high_risk_count}
+
+RECENT SCAN DATA:
+
+{scan_context_text if scan_context_text else "No scans available yet."}
+"""
+
+    # --------------------------------------
+    # HANDLE USER QUESTION
+    # --------------------------------------
 
     if request.method == "POST":
 
@@ -2078,89 +2267,63 @@ def ai_assistant():
             ""
         ).strip()
 
-        print("==========================================")
-        print("SENTINEL AI REQUEST")
-        print("QUESTION:", question)
-
-        # --------------------------------------
-        # EMPTY QUESTION
-        # --------------------------------------
-
         if not question:
 
             error = "Please enter a question."
 
-            print("ERROR: Empty question")
-
-        # --------------------------------------
-        # GEMINI NOT CONFIGURED
-        # --------------------------------------
-
         elif gemini_client is None:
 
-            error = "Gemini API key is not configured."
-
-            print("ERROR: Gemini client is not configured.")
+            error = (
+                "Gemini API key is not configured."
+            )
 
         else:
 
             try:
 
-                # --------------------------------------
-                # GET USER SECURITY DATA
-                # --------------------------------------
-
-                security_context = get_security_context(
-                    session["user_id"]
-                )
-
-                print("Security context loaded.")
-
-                # --------------------------------------
-                # SENTINEL SYSTEM PROMPT
-                # --------------------------------------
+                # ----------------------------------
+                # COMPLETE AI PROMPT
+                # ----------------------------------
 
                 prompt = f"""
-You are Sentinel AI, the cybersecurity assistant
-inside the Sentinel AI XDR security platform.
+{system_prompt}
 
-Your job is to help the authenticated user understand
-their security activity and provide safe cybersecurity
-guidance.
-
-IMPORTANT RULES:
-
-1. Never reveal passwords or sensitive credentials.
-2. Do not invent scan results.
-3. Only use the provided Sentinel scan data when
-   discussing the user's scans.
-4. Clearly distinguish between facts from Sentinel
-   and general cybersecurity advice.
-5. Explain technical concepts in simple language.
-6. If a scan is HIGH RISK, explain why and recommend
-   safe defensive actions.
-7. Never claim that a URL is malicious unless the
-   provided scan data supports that conclusion.
-8. Do not provide instructions for attacking systems,
-   stealing credentials, bypassing security controls,
-   or deploying malware.
-9. Focus on defensive cybersecurity.
+{security_summary}
 
 USER QUESTION:
+
 {question}
 
-USER'S RECENT SENTINEL SECURITY SCANS:
-{security_context}
+INSTRUCTIONS FOR THIS RESPONSE:
 
-Now answer the user's question clearly and professionally.
-If the question is about their scans, use the scan data above.
+Analyze the user's question using the security
+information above.
+
+If the user asks about recent threats:
+- identify relevant suspicious or high-risk scans
+- mention their risk scores
+- explain why they are risky
+- provide defensive recommendations
+
+If the user asks for security recommendations:
+- base them on the available scan activity
+- prioritize the most important risks
+
+If the user asks about a specific scan:
+- explain the score
+- explain the findings
+- explain the Safe Browsing result if available
+- provide a recommendation
+
+If the user asks a general cybersecurity question:
+- answer normally using defensive cybersecurity knowledge.
+
+Use clear headings and bullet points when useful.
 """
 
-                print("Sending request to Gemini...")
-
-                # --------------------------------------
-                # GEMINI
-                # --------------------------------------
+                # ----------------------------------
+                # GEMINI REQUEST
+                # ----------------------------------
 
                 response = gemini_client.models.generate_content(
 
@@ -2171,29 +2334,804 @@ If the question is about their scans, use the scan data above.
 
                 answer = response.text
 
-                print("Gemini response received.")
-
-                print("==========================================")
-
             except Exception as e:
 
-                print("==========================================")
-                print("SENTINEL AI ERROR")
-                print(type(e).__name__)
-                print(str(e))
-                print("==========================================")
-
-                error = (
-                    "Unable to process your request. "
-                    "Please check the server terminal."
+                print(
+                    "Sentinel AI Error:",
+                    repr(e)
                 )
 
+                error = (
+                    "Unable to connect to Sentinel AI. "
+                    "Please check the Gemini API configuration."
+                )
+
+    # --------------------------------------
+    # RENDER AI ASSISTANT
+    # --------------------------------------
+
     return render_template(
+
         "ai_assistant.html",
+
         answer=answer,
+
         error=error,
-        question=question
+
+        total_scans=total_scans,
+
+        safe_count=safe_count,
+
+        suspicious_count=suspicious_count,
+
+        high_risk_count=high_risk_count
     )
+# ==========================================
+# AI SECURITY ANALYSIS
+# ==========================================
+
+@app.route("/ai-security-analysis", methods=["POST"])
+def ai_security_analysis():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "error": "Please login first."
+        }), 401
+
+    if gemini_client is None:
+        return jsonify({
+            "success": False,
+            "error": "Gemini API key is not configured."
+        }), 500
+
+    try:
+
+        # ==========================================
+        # GET USER SCAN HISTORY
+        # ==========================================
+
+        scans = URLScan.query.filter_by(
+            user_id=session["user_id"]
+        ).order_by(
+            URLScan.created_at.desc()
+        ).limit(20).all()
+
+
+        # ==========================================
+        # NO SCANS
+        # ==========================================
+
+        if not scans:
+
+            return jsonify({
+                "success": True,
+                "analysis": """
+### 🛡️ Sentinel Security Overview
+
+No security scans have been performed yet.
+
+### 📊 Scan Activity
+
+There is currently no scan history available for analysis.
+
+### 🛡️ Recommendation
+
+Start by scanning a few URLs using the URL Scanner.
+
+Once scan data is available, Sentinel AI will analyze:
+
+- Safe activity
+- Suspicious activity
+- High-risk threats
+- Risk scores
+- Safe Browsing detections
+- Personalized security recommendations
+
+### 🎯 Priority Action
+
+Run your first URL security scan.
+"""
+            })
+
+
+        # ==========================================
+        # CALCULATE STATISTICS
+        # ==========================================
+
+        total_scans = len(scans)
+
+        safe_count = 0
+        suspicious_count = 0
+        high_risk_count = 0
+
+        highest_score = 0
+
+        scan_data = []
+
+
+        # ==========================================
+        # PREPARE SCAN DATA
+        # ==========================================
+
+        for scan in scans:
+
+            verdict = str(
+                getattr(scan, "verdict", "")
+            ).upper().strip()
+
+            score = getattr(
+                scan,
+                "score",
+                0
+            )
+
+            if score is None:
+                score = 0
+
+            try:
+                score = int(score)
+            except:
+                score = 0
+
+
+            highest_score = max(
+                highest_score,
+                score
+            )
+
+
+            # ------------------------------
+            # VERDICT COUNTS
+            # ------------------------------
+
+            if "HIGH" in verdict:
+
+                high_risk_count += 1
+
+            elif "SUSPICIOUS" in verdict:
+
+                suspicious_count += 1
+
+            elif "SAFE" in verdict:
+
+                safe_count += 1
+
+
+            # ------------------------------
+            # SAFE BROWSING
+            # ------------------------------
+
+            safe_browsing_checked = getattr(
+                scan,
+                "safe_browsing_checked",
+                False
+            )
+
+            safe_browsing_safe = getattr(
+                scan,
+                "safe_browsing_safe",
+                None
+            )
+
+            safe_browsing_threats = getattr(
+                scan,
+                "safe_browsing_threats",
+                None
+            )
+
+
+            # ------------------------------
+            # STORE SCAN
+            # ------------------------------
+
+            scan_data.append({
+
+                "url": getattr(
+                    scan,
+                    "url",
+                    ""
+                ),
+
+                "risk_score": score,
+
+                "verdict": verdict,
+
+                "findings": getattr(
+                    scan,
+                    "findings",
+                    ""
+                ),
+
+                "safe_browsing_checked":
+                    safe_browsing_checked,
+
+                "safe_browsing_safe":
+                    safe_browsing_safe,
+
+                "safe_browsing_threats":
+                    safe_browsing_threats,
+
+                "scan_time":
+                    str(
+                        getattr(
+                            scan,
+                            "created_at",
+                            ""
+                        )
+                    )
+            })
+
+
+        # ==========================================
+        # SECURITY LEVEL
+        # ==========================================
+
+        if high_risk_count > 0:
+
+            security_level = "HIGH RISK"
+
+        elif suspicious_count > 0:
+
+            security_level = "ATTENTION REQUIRED"
+
+        else:
+
+            security_level = "GOOD"
+
+
+        # ==========================================
+        # GEMINI PROMPT
+        # ==========================================
+
+        prompt = f"""
+
+You are Sentinel AI, a defensive cybersecurity analyst
+inside the Sentinel AI XDR security platform.
+
+Your job is to analyze the user's ACTUAL security scan
+history and provide a personalized defensive assessment.
+
+IMPORTANT RULES:
+
+1. Use ONLY the scan data provided below.
+2. Never invent scans, URLs, detections or statistics.
+3. Never claim that a device is infected unless the supplied
+   data explicitly proves it.
+4. Clearly distinguish:
+   - SAFE
+   - SUSPICIOUS
+   - HIGH RISK
+5. Explain why a risky scan is concerning.
+6. Mention Google Safe Browsing information when available.
+7. Give practical defensive recommendations.
+8. Do not provide instructions for attacking systems.
+9. Do not provide malware deployment instructions.
+10. Do not provide credential theft or bypass instructions.
+11. Keep the explanation understandable.
+12. If there is insufficient information, explicitly say so.
+
+==========================================
+USER SECURITY SUMMARY
+==========================================
+
+Total scans: {total_scans}
+
+Safe scans: {safe_count}
+
+Suspicious scans: {suspicious_count}
+
+High Risk scans: {high_risk_count}
+
+Highest risk score: {highest_score}/100
+
+Current security level: {security_level}
+
+
+==========================================
+RECENT SCAN DATA
+==========================================
+
+{scan_data}
+
+
+==========================================
+GENERATE THE FOLLOWING REPORT
+==========================================
+
+
+### 🛡️ Sentinel Security Overview
+
+Give a short personalized overview of the user's
+current security situation.
+
+Mention the overall security level and the most
+important observation from the scan history.
+
+
+### 📊 Scan Activity
+
+Explain:
+
+- Total scans
+- Safe scans
+- Suspicious scans
+- High Risk scans
+- Highest risk score
+
+Do not invent any numbers.
+
+
+### 🚨 Main Security Risks
+
+Identify the most important suspicious or high-risk
+scans from the supplied data.
+
+For each important risk explain:
+
+- URL
+- Risk score
+- Verdict
+- Safe Browsing result if available
+- Important findings
+- Why the scan is concerning
+
+
+### 🔍 Security Observations
+
+Look for patterns in the supplied scan history.
+
+Examples:
+
+- Repeated suspicious scans
+- High-risk URLs
+- Malware detections
+- Safe Browsing warnings
+- Increasing risk scores
+- Mostly safe activity
+
+Only mention patterns that are actually visible
+in the supplied data.
+
+
+### 🛡️ Personalized Security Recommendations
+
+Give 4-6 recommendations specifically based on
+the user's scan history.
+
+Prioritize recommendations according to the
+actual risks found.
+
+For example:
+
+- Avoid high-risk URLs
+- Review suspicious scans
+- Keep browser protection enabled
+- Run endpoint security scans if a malicious URL
+  was actually accessed
+- Re-check suspicious URLs before visiting them
+
+
+### 🎯 Priority Actions
+
+Give exactly the TOP 3 actions the user should
+take first.
+
+Format:
+
+1. ...
+2. ...
+3. ...
+
+
+### ✅ Final Security Assessment
+
+Give a short final assessment.
+
+Do not exaggerate the threat level.
+
+If the data shows mostly safe activity with one
+high-risk scan, say that clearly.
+
+
+Keep the response professional, concise and
+easy to understand.
+"""
+
+
+        # ==========================================
+        # GEMINI REQUEST
+        # ==========================================
+
+        response = gemini_client.models.generate_content(
+
+            model="gemini-3.5-flash",
+
+            contents=prompt
+
+        )
+
+
+        analysis = response.text
+
+
+        # ==========================================
+        # RETURN RESPONSE
+        # ==========================================
+
+        return jsonify({
+
+            "success": True,
+
+            "analysis": analysis,
+
+            "statistics": {
+
+                "total_scans":
+                    total_scans,
+
+                "safe":
+                    safe_count,
+
+                "suspicious":
+                    suspicious_count,
+
+                "high_risk":
+                    high_risk_count,
+
+                "highest_score":
+                    highest_score,
+
+                "security_level":
+                    security_level
+            }
+
+        })
+
+
+    except Exception as e:
+
+        print(
+            "AI Security Analysis Error:",
+            repr(e)
+        )
+
+        return jsonify({
+
+            "success": False,
+
+            "error":
+                "Unable to generate security analysis."
+
+        }), 500
+    
+    # ==========================================
+# AI SECURITY RECOMMENDATIONS
+# ==========================================
+
+@app.route("/ai-security-recommendations", methods=["POST"])
+def ai_security_recommendations():
+
+    # --------------------------------------
+    # LOGIN CHECK
+    # --------------------------------------
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "success": False,
+            "error": "Please login first."
+        }), 401
+
+
+    # --------------------------------------
+    # GEMINI CHECK
+    # --------------------------------------
+
+    if gemini_client is None:
+
+        return jsonify({
+            "success": False,
+            "error": "Gemini API key is not configured."
+        }), 500
+
+
+    try:
+
+        # --------------------------------------
+        # GET USER SCANS
+        # --------------------------------------
+
+        scans = URLScan.query.filter_by(
+            user_id=session["user_id"]
+        ).order_by(
+            URLScan.created_at.desc()
+        ).limit(20).all()
+
+
+        # --------------------------------------
+        # NO SCAN DATA
+        # --------------------------------------
+
+        if not scans:
+
+            return jsonify({
+                "success": True,
+                "answer": """
+### 💡 Sentinel Security Recommendations
+
+No scan history is available yet.
+
+Please perform some URL scans first. Once Sentinel has scan data, I can provide personalized security recommendations based on:
+
+- High-risk scans
+- Suspicious URLs
+- Risk scores
+- Google Safe Browsing results
+- Detected threats
+- Recent security activity
+"""
+            })
+
+
+        # --------------------------------------
+        # PREPARE SECURITY DATA
+        # --------------------------------------
+
+        scan_data = []
+
+        high_risk = 0
+        suspicious = 0
+        safe = 0
+
+
+        for scan in scans:
+
+            verdict = str(
+                scan.verdict or ""
+            ).upper()
+
+
+            if verdict == "HIGH RISK":
+
+                high_risk += 1
+
+            elif verdict == "SUSPICIOUS":
+
+                suspicious += 1
+
+            elif verdict == "SAFE":
+
+                safe += 1
+
+
+            scan_data.append({
+
+                "url": scan.url,
+
+                "risk_score": scan.score,
+
+                "verdict": scan.verdict,
+
+                "findings":
+                    scan.findings or "None",
+
+                "safe_browsing_checked":
+                    scan.safe_browsing_checked,
+
+                "safe_browsing_safe":
+                    scan.safe_browsing_safe,
+
+                "safe_browsing_threats":
+                    scan.safe_browsing_threats or "None",
+
+                "created_at":
+                    str(scan.created_at)
+
+            })
+
+
+        # --------------------------------------
+        # AI PROMPT
+        # --------------------------------------
+
+        prompt = f"""
+
+You are Sentinel AI, a defensive cybersecurity
+recommendation engine inside Sentinel AI XDR.
+
+Analyze ONLY the user's supplied security scan data.
+
+Do not invent security events.
+
+Do not expose passwords, API keys,
+credentials or private information.
+
+Do not provide offensive cybersecurity instructions.
+
+Your job is to generate personalized,
+defensive security recommendations.
+
+USER SECURITY SUMMARY:
+
+Total scans: {len(scans)}
+
+Safe scans: {safe}
+
+Suspicious scans: {suspicious}
+
+High Risk scans: {high_risk}
+
+
+USER SCAN DATA:
+
+{scan_data}
+
+
+Generate the response using this structure:
+
+### 🛡️ Personalized Security Recommendations
+
+Give a short assessment based on the user's actual
+scan history.
+
+### 🚨 Highest Priority Risks
+
+Identify the most important security risks
+visible in the scan data.
+
+### 💡 Recommended Actions
+
+Give 5 practical defensive recommendations.
+
+Prioritize recommendations based on the actual
+risk level and findings.
+
+### 🎯 Priority Action Plan
+
+Give:
+
+1. Immediate action
+2. Short-term action
+3. Long-term action
+
+### 🔐 Security Best Practices
+
+Give additional defensive practices relevant
+to the user's scan activity.
+
+IMPORTANT:
+
+- Base recommendations on supplied data.
+- Do not invent threats.
+- Clearly distinguish HIGH RISK, SUSPICIOUS and SAFE.
+- Mention Google Safe Browsing findings when available.
+- Keep the answer professional and easy to understand.
+"""
+
+
+        # --------------------------------------
+        # GEMINI REQUEST
+        # --------------------------------------
+
+        response = gemini_client.models.generate_content(
+
+            model="gemini-3.5-flash",
+
+            contents=prompt
+
+        )
+
+
+        answer = response.text
+
+
+        # --------------------------------------
+        # RETURN RESPONSE
+        # --------------------------------------
+
+        return jsonify({
+
+            "success": True,
+
+            "answer": answer
+
+        })
+
+
+    except Exception as e:
+
+        print(
+            "AI Security Recommendations Error:",
+            repr(e)
+        )
+
+
+        return jsonify({
+
+            "success": False,
+
+            "error":
+                "Unable to generate security recommendations."
+
+        }), 500
+    
+@app.route("/api/security-alerts")
+def security_alerts():
+
+    if "user_id" not in session:
+        return jsonify({
+            "error": "Unauthorized"
+        }), 401
+
+    alerts = SecurityAlert.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(
+        SecurityAlert.created_at.desc()
+    ).limit(50).all()
+
+    return jsonify([
+        {
+            "id": alert.id,
+            "title": alert.title,
+            "message": alert.message,
+            "severity": alert.severity,
+            "alert_type": alert.alert_type,
+            "is_read": alert.is_read,
+            "created_at": (
+                alert.created_at.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+                if alert.created_at
+                else ""
+            )
+        }
+        for alert in alerts
+    ])   
+@app.route("/api/security-alerts/count")
+def security_alert_count():
+
+    if "user_id" not in session:
+        return jsonify({
+            "error": "Unauthorized"
+        }), 401
+
+    count = SecurityAlert.query.filter_by(
+        user_id=session["user_id"],
+        is_read=False
+    ).count()
+
+    return jsonify({
+        "count": count
+    })
+@app.route(
+    "/api/security-alerts/<int:alert_id>/read",
+    methods=["POST"]
+)
+def mark_alert_read(alert_id):
+
+    if "user_id" not in session:
+        return jsonify({
+            "error": "Unauthorized"
+        }), 401
+
+    alert = SecurityAlert.query.filter_by(
+        id=alert_id,
+        user_id=session["user_id"]
+    ).first()
+
+    if not alert:
+        return jsonify({
+            "error": "Alert not found"
+        }), 404
+
+    alert.is_read = True
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True
+    })
 # ==========================================
 # SCAN HISTORY
 # ==========================================

@@ -2,743 +2,1243 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard | Sentinel AI XDR</title>
+
     <link rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
+          type="image/png"
+          href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
 
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 
 <body class="dashboard-page">
 
-    <!-- ================= SIDEBAR ================= -->
 
-    <aside class="sidebar">
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-        <a href="{{ url_for('home') }}" class="brand">
-    <span class="brand-icon">🛡️</span>
-    <span>SENTINEL</span>
-    <small>AI XDR</small>
-</a>
-
-        <div class="sidebar-section">
-            MAIN
-        </div>
-
-        <nav>
-
-            <a href="/dashboard" class="nav-item active">
-                <span>⌂</span>
-                Dashboard
-            </a>
-
-            <a href="/threats" class="nav-item">
-    <span>◉</span>
-    Threats
-</a>
-
-            <a href="/url-scanner" class="nav-item">
-                <span>⌕</span>
-                URL Scanner
-            </a>
-
-            <a href="/scan-history" class="nav-item">
-                <span>◫</span>
-                Scan History
-            </a>
-
-            <a href="/phishing-detector" class="nav-item">
-                <span>⚠</span>
-                Phishing Detector
-            </a>
-
-            <a href="/password-auditor" class="nav-item">
-                <span>◇</span>
-                Password Auditor
-            </a>
-
-            <a href="/file-scanner" class="nav-item">
-                <span>▣</span>
-                File Scanner
-            </a>
-
-        </nav>
+<aside class="sidebar">
 
 
-        <div class="sidebar-section">
-            INTELLIGENCE
-        </div>
+    <!-- BRAND -->
 
-        <nav>
+    <a href="{{ url_for('home') }}"
+       class="brand">
 
-            <a href="/reports" class="nav-item">
-    <span>◫</span>
-    Reports
-</a>
+        <span class="brand-icon">
+            🛡️
+        </span>
 
-            <a href="/analytics" class="nav-item">
-    <span>◦</span>
-    Analytics
-</a>
-            <a href="/ai-assistant" class="nav-item">
-    <span>✦</span>
-    AI Assistant
-</a>
+        <span>
+            SENTINEL
+        </span>
 
-        </nav>
+        <small>
+            AI XDR
+        </small>
+
+    </a>
 
 
-        <div class="sidebar-bottom">
+    <!-- MAIN -->
 
-           <a href="/settings" class="nav-item">
-    ⚙ Settings
-</a>
-
-            <a href="/logout" class="nav-item logout">
-                <span>↪</span>
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
+    <div class="sidebar-section">
+        MAIN
+    </div>
 
 
-    <!-- ================= MAIN ================= -->
-
-    <main class="dashboard-main">
+    <nav>
 
 
-        <!-- ================= TOPBAR ================= -->
+        <a href="/dashboard"
+           class="nav-item active">
 
-        <header class="dashboard-topbar">
+            <span>⌂</span>
 
-            <div>
+            Dashboard
 
-                <div class="breadcrumb">
-                    Sentinel / Dashboard
-                </div>
+        </a>
 
-                <h1>
-                    Security Overview
-                </h1>
+
+        <a href="/threats"
+           class="nav-item">
+
+            <span>◉</span>
+
+            Threats
+
+        </a>
+
+
+        <a href="/url-scanner"
+           class="nav-item">
+
+            <span>⌕</span>
+
+            URL Scanner
+
+        </a>
+
+
+        <a href="/scan-history"
+           class="nav-item">
+
+            <span>◫</span>
+
+            Scan History
+
+        </a>
+
+
+        <a href="/phishing-detector"
+           class="nav-item">
+
+            <span>⚠</span>
+
+            Phishing Detector
+
+        </a>
+
+
+        <a href="/password-auditor"
+           class="nav-item">
+
+            <span>◇</span>
+
+            Password Auditor
+
+        </a>
+
+
+        <a href="/file-scanner"
+           class="nav-item">
+
+            <span>▣</span>
+
+            File Scanner
+
+        </a>
+
+
+    </nav>
+
+
+    <!-- INTELLIGENCE -->
+
+    <div class="sidebar-section">
+        INTELLIGENCE
+    </div>
+
+
+    <nav>
+
+
+        <a href="/reports"
+           class="nav-item">
+
+            <span>◫</span>
+
+            Reports
+
+        </a>
+
+
+        <a href="/analytics"
+           class="nav-item">
+
+            <span>◦</span>
+
+            Analytics
+
+        </a>
+
+
+        <a href="/ai-assistant"
+           class="nav-item">
+
+            <span>✦</span>
+
+            AI Assistant
+
+        </a>
+
+
+    </nav>
+
+
+    <!-- BOTTOM -->
+
+    <div class="sidebar-bottom">
+
+
+        <a href="/settings"
+           class="nav-item">
+
+            <span>⚙</span>
+
+            Settings
+
+        </a>
+
+
+        <a href="/logout"
+           class="nav-item logout">
+
+            <span>↪</span>
+
+            Logout
+
+        </a>
+
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<main class="dashboard-main">
+
+
+
+    <!-- =====================================================
+         TOPBAR
+    ===================================================== -->
+
+    <header class="dashboard-topbar">
+
+
+        <div>
+
+            <div class="breadcrumb">
+
+                Sentinel / Dashboard
 
             </div>
 
 
-            <div class="topbar-right">
+            <h1>
 
-                <div class="system-status-large">
-                    <span></span>
-                    SYSTEM OPERATIONAL
-                </div>
+                Security Overview
 
+            </h1>
 
-                <div class="notification">
-                    ♢
-                </div>
+        </div>
 
 
-                <div class="user-profile">
 
-                    <div class="avatar">
-                        {{ (user_name | default('User'))[0] | upper }}
-                    </div>
+        <div class="topbar-right">
 
-                    <div>
 
-                        <strong>
-                            {{ user_name | default('User') }}
-                        </strong>
+            <!-- SYSTEM STATUS -->
 
-                        <small>
-                            Security Analyst
-                        </small>
+            <div class="system-status-large">
 
-                    </div>
+                <span></span>
 
-                </div>
+                SYSTEM OPERATIONAL
 
             </div>
 
-        </header>
 
 
-        <!-- ================= WELCOME ================= -->
+            <!-- NOTIFICATION -->
 
-        <section class="dashboard-welcome">
+            <div class="notification">
 
-            <div>
+                ♢
 
-                <span class="welcome-label">
-                    SECURITY COMMAND CENTER
+            </div>
+
+
+
+            <!-- USER -->
+
+            <div class="user-profile">
+
+
+                <div class="avatar">
+
+                    {{ (user_name | default('User'))[0] | upper }}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+
+                        {{ user_name | default('User') }}
+
+                    </strong>
+
+
+                    <small>
+
+                        Security Analyst
+
+                    </small>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </header>
+
+
+
+    <!-- =====================================================
+         WELCOME
+    ===================================================== -->
+
+    <section class="dashboard-welcome">
+
+
+        <div>
+
+
+            <span class="welcome-label">
+
+                SECURITY COMMAND CENTER
+
+            </span>
+
+
+            <h2>
+
+                Welcome back,
+                {{ user_name | default('User') }}
+                👋
+
+            </h2>
+
+
+            <p>
+
+                Here's your current cybersecurity intelligence overview.
+
+            </p>
+
+
+        </div>
+
+
+
+        <a href="/url-scanner"
+           class="scan-button">
+
+            + New Scan
+
+        </a>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STAT CARDS
+    ===================================================== -->
+
+    <section class="stats-grid">
+
+
+        <!-- SECURITY SCORE -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+
+                <span>
+
+                    SECURITY SCORE
+
                 </span>
 
-                <h2>
-                    Welcome back, {{ user_name | default('User') }} 👋
-                </h2>
 
-                <p>
-                    Here's your current cybersecurity intelligence overview.
-                </p>
+                <div class="stat-icon blue">
+
+                    ◈
+
+                </div>
+
 
             </div>
 
 
-            <a href="/url-scanner" class="scan-button">
-                + New Scan
-            </a>
 
-        </section>
+            <div class="stat-value">
 
 
-        <!-- ================= STAT CARDS ================= -->
+                <span id="securityScoreValue">
 
-        <section class="stats-grid">
+                    {{ security_score | default(0) }}
 
-
-            <!-- SECURITY SCORE -->
-
-            <div class="stat-card">
-
-                <div class="stat-header">
-
-                    <span>
-                        SECURITY SCORE
-                    </span>
-
-                    <div class="stat-icon blue">
-                        ◈
-                    </div>
-
-                </div>
+                </span>
 
 
-                <div class="stat-value">
+                <span>
 
-                    <span id="securityScoreValue">
-                        {{ security_score | default(0) }}
-                    </span>
+                    /100
 
-                    <span>
-                        /100
-                    </span>
+                </span>
 
-                </div>
-
-
-                <div class="stat-progress">
-
-                    <div
-                        id="securityProgress"
-                        class="stat-progress-fill">
-                    </div>
-
-                </div>
-
-
-                <p class="stat-good">
-                    Security score based on your scans
-                </p>
 
             </div>
 
 
-            <!-- ACTIVE THREATS -->
 
-            <div class="stat-card">
+            <div class="stat-progress">
 
-                <div class="stat-header">
 
-                    <span>
-                        ACTIVE THREATS
-                    </span>
-
-                    <div class="stat-icon red">
-                        ⚠
-                    </div>
+                <div id="securityProgress"
+                     class="stat-progress-fill">
 
                 </div>
 
-
-                <div class="stat-value">
-
-                    {{ active_threats | default(0) }}
-
-                </div>
-
-
-                <p class="stat-danger">
-
-                    {{ high_risk | default(0) }}
-                    high priority
-
-                </p>
 
             </div>
 
 
-            <!-- TOTAL SCANS -->
 
-            <div class="stat-card">
+            <p class="stat-good">
 
-                <div class="stat-header">
+                Security score based on your scans
 
-                    <span>
-                        TOTAL SCANS
-                    </span>
+            </p>
 
-                    <div class="stat-icon purple">
-                        ⌕
-                    </div>
+
+        </div>
+
+
+
+        <!-- ACTIVE THREATS -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+
+                <span>
+
+                    ACTIVE THREATS
+
+                </span>
+
+
+                <div class="stat-icon red">
+
+                    ⚠
 
                 </div>
 
-
-                <div class="stat-value">
-
-                    {{ total_scans | default(0) }}
-
-                </div>
-
-
-                <p class="stat-muted">
-                    Total URL security scans
-                </p>
 
             </div>
 
 
-            <!-- THREATS BLOCKED -->
 
-            <div class="stat-card">
+            <div class="stat-value">
 
-                <div class="stat-header">
-
-                    <span>
-                        THREATS BLOCKED
-                    </span>
-
-                    <div class="stat-icon green">
-                        ✓
-                    </div>
-
-                </div>
-
-
-                <div class="stat-value">
-
-                    {{ blocked_threats | default(0) }}
-
-                </div>
-
-
-                <p class="stat-good">
-                    High-risk threats detected
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= ANALYTICS ================= -->
-
-        <section class="dashboard-grid">
-
-
-            <!-- THREAT ANALYTICS -->
-
-            <div class="panel analytics-panel">
-
-                <div class="panel-header">
-
-                    <div>
-
-                        <h3>
-                            Threat Analytics
-                        </h3>
-
-                        <p>
-                            Security activity over the last 7 days
-                        </p>
-
-                    </div>
-
-
-                    <select id="timeRange">
-
-                        <option value="7">
-                            Last 7 days
-                        </option>
-
-                        <option value="30">
-                            Last 30 days
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="chart-container">
-
-                    <canvas id="threatChart"></canvas>
-
-                </div>
+                {{ active_threats | default(0) }}
 
             </div>
 
 
-            <!-- THREAT LEVEL -->
 
-            <div class="panel threat-panel">
+            <p class="stat-danger">
 
-                <div class="panel-header">
+                {{ high_risk | default(0) }}
 
-                    <div>
+                high priority
 
-                        <h3>
-                            Threat Level
-                        </h3>
-
-                        <p>
-                            Current environment status
-                        </p>
-
-                    </div>
-
-                </div>
+            </p>
 
 
-                <div class="threat-circle">
+        </div>
 
-                    <div>
 
-                        <strong>
-                            {{ threat_level | default('LOW') }}
-                        </strong>
 
-                        <span>
-                            Risk Level
-                        </span>
+        <!-- TOTAL SCANS -->
 
-                    </div>
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+
+                <span>
+
+                    TOTAL SCANS
+
+                </span>
+
+
+                <div class="stat-icon purple">
+
+                    ⌕
 
                 </div>
 
-
-                <div class="threat-scale">
-
-                    <span>
-                        LOW
-                    </span>
-
-                    <span>
-                        MEDIUM
-                    </span>
-
-                    <span>
-                        HIGH
-                    </span>
-
-                    <span>
-                        CRITICAL
-                    </span>
-
-                </div>
 
             </div>
 
-        </section>
 
 
-        <!-- ================= RECENT ACTIVITY ================= -->
+            <div class="stat-value">
 
-        <section class="panel activity-panel">
+                {{ total_scans | default(0) }}
+
+            </div>
+
+
+
+            <p class="stat-muted">
+
+                Total URL security scans
+
+            </p>
+
+
+        </div>
+
+
+
+        <!-- THREATS BLOCKED -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+
+                <span>
+
+                    THREATS BLOCKED
+
+                </span>
+
+
+                <div class="stat-icon green">
+
+                    ✓
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="stat-value">
+
+                {{ blocked_threats | default(0) }}
+
+            </div>
+
+
+
+            <p class="stat-good">
+
+                High-risk threats detected
+
+            </p>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ANALYTICS GRID
+    ===================================================== -->
+
+    <section class="dashboard-grid">
+
+
+
+        <!-- =================================================
+             THREAT ANALYTICS
+        ================================================= -->
+
+        <div class="panel analytics-panel">
 
 
             <div class="panel-header">
 
+
                 <div>
 
                     <h3>
-                        Recent Threat Activity
+
+                        Threat Analytics
+
                     </h3>
 
+
                     <p>
-                        Latest security events detected by Sentinel
+
+                        Security activity over the last 7 days
+
                     </p>
 
                 </div>
 
 
-                <a href="/scan-history">
-                    View all →
-                </a>
+                <select id="timeRange">
+
+                    <option value="7">
+
+                        Last 7 days
+
+                    </option>
+
+
+                    <option value="30">
+
+                        Last 30 days
+
+                    </option>
+
+                </select>
+
 
             </div>
 
 
-            <div class="activity-list">
+
+            <div class="chart-container">
+
+                <canvas id="threatChart"></canvas>
+
+            </div>
 
 
-                {% if recent_scans %}
+        </div>
 
 
-                    {% for scan in recent_scans %}
+
+        <!-- =================================================
+             THREAT DISTRIBUTION
+        ================================================= -->
+
+        <div class="panel">
 
 
-                        <div class="activity-item">
+            <div class="panel-header">
 
 
-                            <!-- ACTIVITY ICON -->
+                <div>
 
-                            <div class="activity-icon
-                                {% if scan.verdict == 'HIGH RISK' %}
-                                    danger
-                                {% elif scan.verdict == 'SUSPICIOUS' %}
-                                    warning
-                                {% else %}
-                                    success
-                                {% endif %}
-                            ">
+                    <h3>
+
+                        Threat Distribution
+
+                    </h3>
 
 
-                                {% if scan.verdict == 'HIGH RISK' %}
+                    <p>
 
-                                    ⚠
+                        Distribution of scanned URLs
 
-                                {% elif scan.verdict == 'SUSPICIOUS' %}
+                    </p>
 
-                                    !
-
-                                {% else %}
-
-                                    ✓
-
-                                {% endif %}
+                </div>
 
 
-                            </div>
+            </div>
 
 
-                            <!-- ACTIVITY INFO -->
 
-                            <div class="activity-info">
+            <div class="chart-container">
 
-                                <strong>
-                                    {{ scan.verdict | default('UNKNOWN') }}
-                                    URL detected
-                                </strong>
+                <canvas id="threatDistributionChart"></canvas>
+
+            </div>
 
 
-                                <span>
-                                    URL Scanner ·
-                                    {{ scan.url | default('Unknown URL') }}
-                                </span>
-
-                            </div>
+        </div>
 
 
-                            <!-- SEVERITY -->
 
-                            <div class="severity
-                                {% if scan.verdict == 'HIGH RISK' %}
-                                    high
-                                {% elif scan.verdict == 'SUSPICIOUS' %}
-                                    medium
-                                {% else %}
-                                    safe
-                                {% endif %}
-                            ">
+        <!-- =================================================
+             THREAT LEVEL
+        ================================================= -->
 
-                                {{ scan.verdict | default('UNKNOWN') }}
+        <div class="panel threat-panel">
 
-                            </div>
+
+            <div class="panel-header">
+
+
+                <div>
+
+                    <h3>
+
+                        Threat Level
+
+                    </h3>
+
+
+                    <p>
+
+                        Current environment status
+
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="threat-circle">
+
+
+                <div>
+
+
+                    <strong>
+
+                        {{ threat_level | default('LOW') }}
+
+                    </strong>
+
+
+                    <span>
+
+                        Risk Level
+
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="threat-scale">
+
+
+                <span>
+
+                    LOW
+
+                </span>
+
+
+                <span>
+
+                    MEDIUM
+
+                </span>
+
+
+                <span>
+
+                    HIGH
+
+                </span>
+
+
+                <span>
+
+                    CRITICAL
+
+                </span>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECENT ACTIVITY
+    ===================================================== -->
+
+    <section class="panel activity-panel">
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+
+                <h3>
+
+                    Recent Threat Activity
+
+                </h3>
+
+
+                <p>
+
+                    Latest security events detected by Sentinel
+
+                </p>
+
+
+            </div>
+
+
+            <a href="/scan-history">
+
+                View all →
+
+            </a>
+
+
+        </div>
+
+
+
+        <div class="activity-list">
+
+
+            {% if recent_scans %}
+
+
+                {% for scan in recent_scans %}
+
+
+                    <div class="activity-item">
+
+
+                        <!-- ACTIVITY ICON -->
+
+                        <div class="activity-icon
+
+                            {% if scan.verdict == 'HIGH RISK' %}
+
+                                danger
+
+                            {% elif scan.verdict == 'SUSPICIOUS' %}
+
+                                warning
+
+                            {% else %}
+
+                                success
+
+                            {% endif %}
+
+                        ">
+
+
+                            {% if scan.verdict == 'HIGH RISK' %}
+
+                                ⚠
+
+                            {% elif scan.verdict == 'SUSPICIOUS' %}
+
+                                !
+
+                            {% else %}
+
+                                ✓
+
+                            {% endif %}
 
 
                         </div>
 
 
-                    {% endfor %}
+
+                        <!-- ACTIVITY INFO -->
+
+                        <div class="activity-info">
 
 
-                {% else %}
+                            <strong>
+
+                                {{ scan.verdict | default('UNKNOWN') }}
+
+                                URL detected
+
+                            </strong>
 
 
-                    <div class="empty-history">
+                            <span>
 
-                        <h3>
-                            No security activity yet
-                        </h3>
+                                URL Scanner ·
 
-                        <p>
-                            Run your first URL scan to see activity here.
-                        </p>
+                                {{ scan.url | default('Unknown URL') }}
 
-                        <a href="/url-scanner" class="primary-btn">
-                            Start a Scan →
-                        </a>
+                            </span>
+
+
+                        </div>
+
+
+
+                        <!-- SEVERITY -->
+
+                        <div class="severity
+
+                            {% if scan.verdict == 'HIGH RISK' %}
+
+                                high
+
+                            {% elif scan.verdict == 'SUSPICIOUS' %}
+
+                                medium
+
+                            {% else %}
+
+                                safe
+
+                            {% endif %}
+
+                        ">
+
+
+                            {{ scan.verdict | default('UNKNOWN') }}
+
+
+                        </div>
+
 
                     </div>
 
 
-                {% endif %}
+                {% endfor %}
 
 
-            </div>
-
-        </section>
+            {% else %}
 
 
-    </main>
+                <div class="empty-history">
 
 
-    <!-- ================= CHART DATA ================= -->
+                    <h3>
 
-    <script type="application/json" id="chartLabelsData">
-        {{ chart_labels | default([]) | tojson }}
-    </script>
+                        No security activity yet
 
-
-    <script type="application/json" id="chartValuesData">
-        {{ chart_data | default([]) | tojson }}
-    </script>
+                    </h3>
 
 
-    <!-- ================= JAVASCRIPT ================= -->
+                    <p>
 
-    <script>
+                        Run your first URL scan to see activity here.
 
-        document.addEventListener("DOMContentLoaded", function () {
-
-
-            /* ==========================
-               SECURITY SCORE
-            ========================== */
-
-            const scoreElement =
-                document.getElementById("securityScoreValue");
-
-            const progressElement =
-                document.getElementById("securityProgress");
+                    </p>
 
 
-            if (scoreElement && progressElement) {
+                    <a href="/url-scanner"
+                       class="primary-btn">
 
-                let score =
-                    parseFloat(scoreElement.textContent.trim()) || 0;
+                        Start a Scan →
 
-
-                score =
-                    Math.max(0, Math.min(100, score));
+                    </a>
 
 
-                progressElement.style.width =
-                    score + "%";
-
-            }
+                </div>
 
 
-            /* ==========================
-               CHART DATA
-            ========================== */
-
-            const labelsElement =
-                document.getElementById("chartLabelsData");
-
-            const valuesElement =
-                document.getElementById("chartValuesData");
+            {% endif %}
 
 
-            let chartLabels = [];
-            let chartData = [];
+        </div>
 
 
-            if (labelsElement) {
-
-                try {
-
-                    chartLabels =
-                        JSON.parse(labelsElement.textContent.trim());
-
-                } catch (error) {
-
-                    console.error(
-                        "Chart labels error:",
-                        error
-                    );
-
-                    chartLabels = [];
-
-                }
-
-            }
+    </section>
 
 
-            if (valuesElement) {
 
-                try {
-
-                    chartData =
-                        JSON.parse(valuesElement.textContent.trim());
-
-                } catch (error) {
-
-                    console.error(
-                        "Chart data error:",
-                        error
-                    );
-
-                    chartData = [];
-
-                }
-
-            }
+</main>
 
 
-            /* ==========================
-               THREAT CHART
-            ========================== */
 
-            const canvas =
-                document.getElementById("threatChart");
+<!-- =========================================================
+     DATA FOR JAVASCRIPT
+     
+     IMPORTANT:
+     Jinja is NOT inside JavaScript objects.
+     Values are stored in HTML data attributes.
+========================================================= -->
+
+
+<div id="dashboardData"
+
+     data-safe="{{ safe_count | default(0) }}"
+
+     data-suspicious="{{ suspicious_count | default(0) }}"
+
+     data-high-risk="{{ high_risk_count | default(0) }}"
+
+     data-chart-labels='{{ chart_labels | default([]) | tojson }}'
+
+     data-chart-values='{{ chart_data | default([]) | tojson }}'>
+
+</div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* =====================================================
+           SECURITY SCORE
+        ===================================================== */
+
+        const scoreElement =
+            document.getElementById(
+                "securityScoreValue"
+            );
+
+
+        const progressElement =
+            document.getElementById(
+                "securityProgress"
+            );
+
+
+        if (
+            scoreElement &&
+            progressElement
+        ) {
+
+
+            let score =
+                parseFloat(
+                    scoreElement.textContent.trim()
+                );
 
 
             if (
-                canvas &&
-                typeof Chart !== "undefined"
+                isNaN(score)
             ) {
 
-                new Chart(canvas, {
+                score = 0;
+
+            }
+
+
+            score =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        score
+                    )
+                );
+
+
+            progressElement.style.width =
+                score + "%";
+
+
+        }
+
+
+
+        /* =====================================================
+           DASHBOARD DATA
+        ===================================================== */
+
+        const dashboardData =
+            document.getElementById(
+                "dashboardData"
+            );
+
+
+        let safeCount = 0;
+
+        let suspiciousCount = 0;
+
+        let highRiskCount = 0;
+
+        let chartLabels = [];
+
+        let chartValues = [];
+
+
+
+        if (dashboardData) {
+
+
+            safeCount =
+                parseInt(
+                    dashboardData.dataset.safe,
+                    10
+                ) || 0;
+
+
+            suspiciousCount =
+                parseInt(
+                    dashboardData.dataset.suspicious,
+                    10
+                ) || 0;
+
+
+            highRiskCount =
+                parseInt(
+                    dashboardData.dataset.highRisk,
+                    10
+                ) || 0;
+
+
+
+            /* ===============================================
+               CHART LABELS
+            =============================================== */
+
+            try {
+
+
+                chartLabels =
+                    JSON.parse(
+                        dashboardData.dataset.chartLabels
+                    );
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Chart labels error:",
+                    error
+                );
+
+
+                chartLabels = [];
+
+
+            }
+
+
+
+            /* ===============================================
+               CHART VALUES
+            =============================================== */
+
+            try {
+
+
+                chartValues =
+                    JSON.parse(
+                        dashboardData.dataset.chartValues
+                    );
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Chart values error:",
+                    error
+                );
+
+
+                chartValues = [];
+
+
+            }
+
+
+        }
+
+
+
+        /* =====================================================
+           THREAT ANALYTICS LINE CHART
+        ===================================================== */
+
+        const threatCanvas =
+            document.getElementById(
+                "threatChart"
+            );
+
+
+        if (
+            threatCanvas &&
+            typeof Chart !== "undefined"
+        ) {
+
+
+            new Chart(
+                threatCanvas,
+                {
 
                     type: "line",
 
-                    data: {
 
-                        labels: chartLabels,
+                    data:
+                    {
 
-                        datasets: [
+                        labels:
+                            chartLabels,
+
+
+                        datasets:
+                        [
 
                             {
 
-                                label: "Threats",
+                                label:
+                                    "Security Activity",
 
-                                data: chartData,
 
-                                borderWidth: 2,
+                                data:
+                                    chartValues,
 
-                                tension: 0.4,
 
-                                fill: true
+                                borderWidth:
+                                    2,
+
+
+                                tension:
+                                    0.4,
+
+
+                                fill:
+                                    true
 
                             }
 
@@ -747,33 +1247,46 @@
                     },
 
 
-                    options: {
+                    options:
+                    {
 
-                        responsive: true,
+                        responsive:
+                            true,
 
-                        maintainAspectRatio: false,
+
+                        maintainAspectRatio:
+                            false,
 
 
-                        plugins: {
+                        plugins:
+                        {
 
-                            legend: {
+                            legend:
+                            {
 
-                                display: false
+                                display:
+                                    false
 
                             }
 
                         },
 
 
-                        scales: {
+                        scales:
+                        {
 
-                            y: {
+                            y:
+                            {
 
-                                beginAtZero: true,
+                                beginAtZero:
+                                    true,
 
-                                ticks: {
 
-                                    precision: 0
+                                ticks:
+                                {
+
+                                    precision:
+                                        0
 
                                 }
 
@@ -783,13 +1296,123 @@
 
                     }
 
-                });
+                }
+            );
 
-            }
 
-        });
+        }
 
-    </script>
+
+
+        /* =====================================================
+           THREAT DISTRIBUTION DOUGHNUT
+        ===================================================== */
+
+        const distributionCanvas =
+            document.getElementById(
+                "threatDistributionChart"
+            );
+
+
+        if (
+            distributionCanvas &&
+            typeof Chart !== "undefined"
+        ) {
+
+
+            new Chart(
+                distributionCanvas,
+                {
+
+                    type:
+                        "doughnut",
+
+
+                    data:
+                    {
+
+                        labels:
+                        [
+
+                            "Safe",
+
+                            "Suspicious",
+
+                            "High Risk"
+
+                        ],
+
+
+                        datasets:
+                        [
+
+                            {
+
+                                data:
+                                [
+
+                                    safeCount,
+
+                                    suspiciousCount,
+
+                                    highRiskCount
+
+                                ],
+
+
+                                borderWidth:
+                                    2
+
+                            }
+
+                        ]
+
+                    },
+
+
+                    options:
+                    {
+
+                        responsive:
+                            true,
+
+
+                        maintainAspectRatio:
+                            false,
+
+
+                        cutout:
+                            "65%",
+
+
+                        plugins:
+                        {
+
+                            legend:
+                            {
+
+                                position:
+                                    "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+        }
+
+
+
+    }
+
+);
+
+</script>
 
 
 </body>
