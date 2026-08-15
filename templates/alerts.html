@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Security Alerts | Sentinel AI XDR</title>
+
+    <link rel="icon"
+          type="image/png"
+          href="{{ url_for('static', filename='images/sentinel-icon.png') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body class="dashboard-page">
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+
+    <!-- BRAND -->
+
+    <div class="sidebar-logo">
+
+        <a href="{{ url_for('dashboard') }}"
+           class="brand">
+
+            <span class="brand-icon">
+                🛡️
+            </span>
+
+            <span>
+                SENTINEL
+            </span>
+
+            <small>
+                AI XDR
+            </small>
+
+        </a>
+
+    </div>
+
+
+    <!-- MAIN -->
+
+    <div class="sidebar-section">
+        MAIN
+    </div>
+
+
+    <nav>
+
+
+        <!-- DASHBOARD -->
+
+        <a href="{{ url_for('dashboard') }}"
+           class="nav-item">
+
+            <span>
+                ⌂
+            </span>
+
+            Dashboard
+
+        </a>
+
+
+        <!-- THREATS -->
+
+        <a href="/threats"
+           class="nav-item">
+
+            <span>
+                ◉
+            </span>
+
+            Threats
+
+        </a>
+
+
+        <!-- URL SCANNER -->
+
+        <a href="{{ url_for('url_scanner') }}"
+           class="nav-item">
+
+            <span>
+                ⌕
+            </span>
+
+            URL Scanner
+
+        </a>
+
+
+        <!-- SCAN HISTORY -->
+
+        <a href="/scan-history"
+           class="nav-item">
+
+            <span>
+                ◫
+            </span>
+
+            Scan History
+
+        </a>
+
+
+        <!-- PHISHING -->
+
+        <a href="/phishing-detector"
+           class="nav-item">
+
+            <span>
+                ⚠
+            </span>
+
+            Phishing Detector
+
+        </a>
+
+
+        <!-- PASSWORD -->
+
+        <a href="/password-auditor"
+           class="nav-item">
+
+            <span>
+                ◇
+            </span>
+
+            Password Auditor
+
+        </a>
+
+
+        <!-- FILE SCANNER -->
+
+        <a href="/file-scanner"
+           class="nav-item">
+
+            <span>
+                ▣
+            </span>
+
+            File Scanner
+
+        </a>
+
+
+    </nav>
+
+
+    <!-- =================================================
+         INTELLIGENCE
+    ================================================= -->
+
+    <div class="sidebar-section">
+        INTELLIGENCE
+    </div>
+
+
+    <nav>
+
+
+        <!-- ALERTS -->
+
+        <a href="{{ url_for('alerts') }}"
+           class="nav-item active">
+
+            <span>
+                🔔
+            </span>
+
+            Security Alerts
+
+        </a>
+
+
+        <!-- REPORTS -->
+
+        <a href="/reports"
+           class="nav-item">
+
+            <span>
+                ◫
+            </span>
+
+            Reports
+
+        </a>
+
+
+        <!-- ANALYTICS -->
+
+        <a href="/analytics"
+           class="nav-item">
+
+            <span>
+                ◦
+            </span>
+
+            Analytics
+
+        </a>
+
+
+        <!-- AI -->
+
+        <a href="/ai-assistant"
+           class="nav-item">
+
+            <span>
+                ✦
+            </span>
+
+            AI Assistant
+
+        </a>
+
+
+    </nav>
+
+
+    <!-- =================================================
+         BOTTOM
+    ================================================= -->
+
+    <div class="sidebar-bottom">
+
+
+        <a href="/settings"
+           class="nav-item">
+
+            <span>
+                ⚙
+            </span>
+
+            Settings
+
+        </a>
+
+
+        <a href="/logout"
+           class="nav-item logout">
+
+            <span>
+                ↪
+            </span>
+
+            Logout
+
+        </a>
+
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<main class="dashboard-main">
+
+
+    <!-- =================================================
+         TOPBAR
+    ================================================= -->
+
+    <header class="dashboard-topbar">
+
+
+        <div>
+
+            <div class="breadcrumb">
+
+                Sentinel / Security Alerts
+
+            </div>
+
+
+            <h1>
+
+                Security Alerts
+
+            </h1>
+
+
+        </div>
+
+
+        <!-- USER -->
+
+        <div class="topbar-right">
+
+
+            <div class="system-status-large">
+
+                <span></span>
+
+                SYSTEM OPERATIONAL
+
+            </div>
+
+
+            <div class="user-profile">
+
+
+                <div class="avatar">
+
+                    {{ (session.get("user_name", "User"))[0] | upper }}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+
+                        {{ session.get("user_name", "User") }}
+
+                    </strong>
+
+
+                    <small>
+
+                        Security Analyst
+
+                    </small>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </header>
+
+
+
+    <!-- =================================================
+         PAGE HEADER
+    ================================================= -->
+
+    <section class="dashboard-welcome">
+
+
+        <div>
+
+
+            <span class="welcome-label">
+
+                SECURITY MONITORING
+
+            </span>
+
+
+            <h2>
+
+                Security Alerts 🔔
+
+            </h2>
+
+
+            <p>
+
+                Real-time security events detected by Sentinel AI XDR.
+
+            </p>
+
+
+        </div>
+
+
+        <a href="{{ url_for('url_scanner') }}"
+           class="scan-button">
+
+            + New Scan
+
+        </a>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         ALERT STATISTICS
+    ================================================= -->
+
+    <section class="stats-grid">
+
+
+        <!-- TOTAL ALERTS -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+                <span>
+                    TOTAL ALERTS
+                </span>
+
+
+                <div class="stat-icon blue">
+
+                    🔔
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {{ alerts | length }}
+
+            </div>
+
+
+            <p class="stat-muted">
+
+                Security events detected
+
+            </p>
+
+
+        </div>
+
+
+
+        <!-- CRITICAL -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+                <span>
+                    CRITICAL
+                </span>
+
+
+                <div class="stat-icon red">
+
+                    🚨
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {% set critical_count = alerts
+                    | selectattr("severity", "equalto", "CRITICAL")
+                    | list
+                    | length
+                %}
+
+                {{ critical_count }}
+
+            </div>
+
+
+            <p class="stat-danger">
+
+                Immediate attention
+
+            </p>
+
+
+        </div>
+
+
+
+        <!-- HIGH -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+                <span>
+                    HIGH
+                </span>
+
+
+                <div class="stat-icon purple">
+
+                    ⚠
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {% set high_count = alerts
+                    | selectattr("severity", "equalto", "HIGH")
+                    | list
+                    | length
+                %}
+
+                {{ high_count }}
+
+            </div>
+
+
+            <p class="stat-danger">
+
+                High-priority events
+
+            </p>
+
+
+        </div>
+
+
+
+        <!-- URL SCAN -->
+
+        <div class="stat-card">
+
+
+            <div class="stat-header">
+
+                <span>
+                    URL SCAN ALERTS
+                </span>
+
+
+                <div class="stat-icon green">
+
+                    ⌕
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {% set url_alert_count = alerts
+                    | selectattr("alert_type", "equalto", "URL_SCAN")
+                    | list
+                    | length
+                %}
+
+                {{ url_alert_count }}
+
+            </div>
+
+
+            <p class="stat-good">
+
+                Generated by URL Scanner
+
+            </p>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         ALERT LIST
+    ================================================= -->
+
+    <section class="panel activity-panel">
+
+
+        <div class="panel-header">
+
+
+            <div>
+
+                <h3>
+
+                    Recent Security Alerts
+
+                </h3>
+
+
+                <p>
+
+                    Latest threats detected by Sentinel
+
+                </p>
+
+            </div>
+
+
+            <a href="{{ url_for('url_scanner') }}">
+
+                Scan URL →
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- ALERTS -->
+
+        <div class="alerts-container">
+
+
+            {% if alerts %}
+
+
+                {% for alert in alerts %}
+
+
+                    <div class="security-alert-card
+
+                        {% if alert.severity == 'CRITICAL' %}
+
+                            alert-critical
+
+                        {% elif alert.severity == 'HIGH' %}
+
+                            alert-high
+
+                        {% elif alert.severity == 'MEDIUM' %}
+
+                            alert-medium
+
+                        {% else %}
+
+                            alert-low
+
+                        {% endif %}
+
+                    ">
+
+
+                        <!-- ICON -->
+
+                        <div class="alert-icon">
+
+
+                            {% if alert.severity == "CRITICAL" %}
+
+                                🚨
+
+                            {% elif alert.severity == "HIGH" %}
+
+                                ⚠️
+
+                            {% elif alert.severity == "MEDIUM" %}
+
+                                🟡
+
+                            {% else %}
+
+                                🔵
+
+                            {% endif %}
+
+
+                        </div>
+
+
+
+                        <!-- CONTENT -->
+
+                        <div class="alert-content">
+
+
+                            <div class="alert-top">
+
+
+                                <h3>
+
+                                    {{ alert.title }}
+
+                                </h3>
+
+
+                                <span class="alert-severity">
+
+                                    {{ alert.severity }}
+
+                                </span>
+
+
+                            </div>
+
+
+                            <p>
+
+                                {{ alert.message }}
+
+                            </p>
+
+
+                            <div class="alert-meta">
+
+
+                                <span>
+
+                                    Type:
+
+                                    {{ alert.alert_type }}
+
+                                </span>
+
+
+                                <span>
+
+
+                                    {% if alert.created_at %}
+
+                                        {{ alert.created_at.strftime(
+                                            "%d %b %Y, %I:%M %p"
+                                        ) }}
+
+                                    {% else %}
+
+                                        Unknown time
+
+                                    {% endif %}
+
+
+                                </span>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            {% else %}
+
+
+                <!-- EMPTY STATE -->
+
+                <div class="empty-history">
+
+
+                    <div style="font-size:55px;">
+
+                        🛡️
+
+                    </div>
+
+
+                    <h3>
+
+                        No security alerts
+
+                    </h3>
+
+
+                    <p>
+
+                        Sentinel has not detected any security alerts yet.
+
+                    </p>
+
+
+                    <a href="{{ url_for('url_scanner') }}"
+                       class="primary-btn">
+
+                        Start a URL Scan →
+
+                    </a>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     PAGE STYLE
+===================================================== -->
+
+<style>
+
+
+/* =====================================================
+   ALERT CONTAINER
+===================================================== */
+
+.alerts-container {
+
+    padding: 10px 0;
+
+}
+
+
+
+/* =====================================================
+   ALERT CARD
+===================================================== */
+
+.security-alert-card {
+
+    display: flex;
+
+    gap: 18px;
+
+    padding: 20px;
+
+    margin-bottom: 15px;
+
+    border-radius: 14px;
+
+    background: rgba(15, 23, 42, 0.95);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    transition: all 0.25s ease;
+
+}
+
+
+.security-alert-card:hover {
+
+    transform: translateY(-2px);
+
+    border-color: rgba(14, 165, 233, 0.35);
+
+}
+
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.alert-icon {
+
+    min-width: 48px;
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.05);
+
+    font-size: 23px;
+
+}
+
+
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.alert-content {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.alert-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.alert-top h3 {
+
+    margin: 0;
+
+    color: #ffffff;
+
+}
+
+
+.alert-content p {
+
+    margin: 8px 0;
+
+    color: rgba(255, 255, 255, 0.72);
+
+    line-height: 1.6;
+
+    word-break: break-word;
+
+}
+
+
+
+/* =====================================================
+   SEVERITY
+===================================================== */
+
+.alert-severity {
+
+    padding: 5px 11px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+
+.alert-critical {
+
+    border-left: 4px solid #ef4444;
+
+}
+
+
+.alert-critical .alert-severity {
+
+    color: #ef4444;
+
+    background: rgba(239, 68, 68, 0.12);
+
+}
+
+
+.alert-high {
+
+    border-left: 4px solid #f97316;
+
+}
+
+
+.alert-high .alert-severity {
+
+    color: #f97316;
+
+    background: rgba(249, 115, 22, 0.12);
+
+}
+
+
+.alert-medium {
+
+    border-left: 4px solid #f59e0b;
+
+}
+
+
+.alert-medium .alert-severity {
+
+    color: #f59e0b;
+
+    background: rgba(245, 158, 11, 0.12);
+
+}
+
+
+.alert-low {
+
+    border-left: 4px solid #22c55e;
+
+}
+
+
+.alert-low .alert-severity {
+
+    color: #22c55e;
+
+    background: rgba(34, 197, 94, 0.12);
+
+}
+
+
+
+/* =====================================================
+   META
+===================================================== */
+
+.alert-meta {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    font-size: 11px;
+
+    color: rgba(255, 255, 255, 0.45);
+
+}
+
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+
+    .alert-top {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .alert-meta {
+
+        flex-direction: column;
+
+    }
+
+
+    .security-alert-card {
+
+        padding: 15px;
+
+    }
+
+}
+
+</style>
+
+
+</body>
+
+</html>

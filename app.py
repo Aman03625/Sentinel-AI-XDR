@@ -229,8 +229,10 @@ def create_security_alert(
 
     db.session.add(alert)
     db.session.commit()
+    
 
     return alert
+
 # ==========================================
 # HOME
 # ==========================================
@@ -904,6 +906,31 @@ def url_scanner():
                 verdict = "SAFE"
 
                 level = "safe"
+
+
+           # ==========================================
+# CREATE SECURITY ALERT
+# =========================================
+
+            if verdict == "HIGH RISK":
+
+             create_security_alert(
+        user_id=session["user_id"],
+        title="High Risk URL Detected",
+        message=f"Sentinel detected a high-risk URL: {url}",
+        severity="CRITICAL",
+        alert_type="URL_SCAN"
+    )
+
+            elif verdict == "SUSPICIOUS":
+
+             create_security_alert(
+        user_id=session["user_id"],
+        title="Suspicious URL Detected",
+        message=f"Sentinel detected a suspicious URL: {url}",
+        severity="HIGH",
+        alert_type="URL_SCAN"
+    )     
 
             # ==================================
             # RESULT FOR HTML
@@ -3104,6 +3131,26 @@ def security_alert_count():
     return jsonify({
         "count": count
     })
+# ==========================================
+# SECURITY ALERTS PAGE
+# ==========================================
+
+@app.route("/alerts")
+def alerts():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    alerts = SecurityAlert.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(
+        SecurityAlert.created_at.desc()
+    ).limit(50).all()
+
+    return render_template(
+        "alerts.html",
+        alerts=alerts
+    )
 @app.route(
     "/api/security-alerts/<int:alert_id>/read",
     methods=["POST"]
